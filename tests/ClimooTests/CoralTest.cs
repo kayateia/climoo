@@ -268,20 +268,75 @@ metal.bar = a
 b = metal[5]
 metal[""bear""] = ""kitten""
 ";
-		runAndDump( "Metal", r, program );
+		runAndDump( "Metal", r, program, null );
+	}
+
+	class PtTest
+	{
+		[CoralPassthrough]
+		public void test( int a, string b, string[] c, bool d, PtTest e )
+		{
+			_a = a;
+			_b = b;
+			_c = c;
+			_d = d;
+			_e = e;
+		}
+
+		public int _a;
+		public string _b;
+		public string[] _c;
+		public bool _d;
+		public PtTest _e;
+
+		[CoralPassthrough]
+		public string property
+		{
+			get
+			{
+				return _prop;
+			}
+
+			set
+			{
+				_prop = value;
+			}
+		}
+		public string _prop;
+	}
+
+	[Test]
+	public void Passthrough()
+	{
+		PtTest pt = new PtTest();
+		Passthrough pter = new Passthrough( pt );
+
+		string program = @"
+pt.test(5, ""bob"", [""1"", ""2""], true, pt)
+pt.property = ""bar""
+a = pt.property
+";
+		Runner r = new Runner();
+		pter.registerConst( r.state.constScope, "pt" );
+		runAndDump( "Passthrough", r, program,
+			() => "object dump: {0} {1} {2} {3} {4}\r\n".FormatI(
+				dumpObject( pt._a ), dumpObject( pt._b ), dumpObject( pt._c ), dumpObject( pt._d ), dumpObject( pt._e )
+			) );
 	}
 
 	void runAndDump( string name, string code )
 	{
 		Runner r = new Runner();
-		runAndDump( name, r, code );
+		runAndDump( name, r, code, null );
 	}
 
-	void runAndDump( string name, Runner r, string code )
+	void runAndDump( string name, Runner r, string code, Func<string> extra )
 	{
 		CodeFragment cf = Compiler.Compile( code );
 		r.runSync( cf );
 		string results = dumpScope( r.state );
+		if( extra != null )
+			results += extra();
 		TestCommon.CompareRef( Path.Combine( "Coral", name ), results );
 	}
 
@@ -306,6 +361,8 @@ metal[""bear""] = ""kitten""
 	{
 		if( o is List<object> )
 			return dumpArray( (List<object>)o );
+		else if( o is string[] )
+			return dumpArray( new List<object>( (string[])o ) );
 		else if( o is Dictionary<object,object> )
 			return dumpDict( (Dictionary<object,object>)o );
 		else if( o is FValue )
