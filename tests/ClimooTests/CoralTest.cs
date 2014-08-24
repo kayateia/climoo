@@ -97,9 +97,14 @@ x = fib(5)
 	public void Arrays()
 	{
 		string program = @"
-a = [1,2,3,4,5]
+a = [1,2,3,4,5,6]
 b = a[3]
 c = [1, ""foo"", b]
+d = a[:2]
+e = a[2:]
+f = a[1:3]
+g = a[1:-1]
+h = a[-4:20]
 ";
 		runAndDump( "Arrays", program );
 	}
