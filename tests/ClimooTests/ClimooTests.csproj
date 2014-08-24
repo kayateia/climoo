@@ -43,6 +43,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CoralTest.cs" />
     <Compile Include="CoreDatabaseTest.cs" />
     <Compile Include="DatabaseMemory.cs" />
     <Compile Include="DatabaseCommon.cs" />
@@ -71,6 +72,10 @@
     <ProjectReference Include="..\..\MooCore\MooCore.csproj">
       <Project>{0AA2B12E-33C7-456C-B550-61C1AF11968B}</Project>
       <Name>MooCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\scripting\Coral\Coral.csproj">
+      <Project>{1BB2C096-6CBA-48AC-BBD1-6E490235CEC5}</Project>
+      <Name>Coral</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
