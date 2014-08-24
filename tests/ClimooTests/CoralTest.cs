@@ -40,6 +40,12 @@ public class CoralTest
 		//
 		// Quite a few things are commented out; these aren't in the AST compiler yet.
 		string program = @"
+// single line comment
+/*
+  multi
+  line
+  comment
+*/
 a[:-5]
 a[b.f.a(10,a):]
 a[2:5]
