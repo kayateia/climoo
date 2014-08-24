@@ -305,6 +305,7 @@ metal[""bear""] = ""kitten""
 		public string _prop;
 	}
 
+	// Works
 	[Test]
 	public void Passthrough()
 	{
@@ -322,6 +323,27 @@ a = pt.property
 			() => "object dump: {0} {1} {2} {3} {4}\r\n".FormatI(
 				dumpObject( pt._a ), dumpObject( pt._b ), dumpObject( pt._c ), dumpObject( pt._d ), dumpObject( pt._e )
 			) );
+	}
+
+	[Test]
+	public void CallFunc()
+	{
+		string program = @"
+def fib(n):
+    if n == 0:
+        return 1
+    elif n == 1:
+        return 1
+    else:
+        return fib(n-2) + fib(n-1)
+";
+		Runner r = new Runner();
+		runAndDump( "CallFunc", r, program, () =>
+			{
+				object rv = r.callFunction( "fib", new object[] { 5 }, typeof( int ) );
+				return "function return value: {0}".FormatI( dumpObject( rv ) );
+			}
+		);
 	}
 
 	void runAndDump( string name, string code )
