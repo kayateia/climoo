@@ -109,6 +109,19 @@ h = a[-4:20]
 		runAndDump( "Arrays", program );
 	}
 
+	[Test]
+	public void Dictionaries()
+	{
+		string program = @"
+a = { 1:10, ""foo"":[1,2,3,4] }
+b = a[1]
+c = a[""foo""]
+d = c[1]
+e = a.foo[1]
+";
+		runAndDump( "Dictionaries", program );
+	}
+
 	// Works
 	[Test]
 	public void Assignment()
