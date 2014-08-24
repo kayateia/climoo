@@ -20,6 +20,7 @@ namespace Kayateia.Climoo.Tests
 {
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
@@ -224,9 +225,9 @@ d = ""{0} {0}"".format(b)
 		Runner r = new Runner();
 		Action<string> adder = s =>
 			r.state.scope.set( "output",
-				r.state.scope.get( "output" ) + s + "\n" );
+				r.state.scope.get( "output" ) + s + "\r\n" );
 		r.state.scope.set( "testfunc",
-			new FValue( (state, ps) => adder( "Native write: {0}\n".FormatI( ps[0] ) ) )
+			new FValue( (state, ps) => adder( "Native write: {0}\r\n".FormatI( ps[0] ) ) )
 		);
 		r.state.scope.set( "metal",
 			new MetalObject()
@@ -275,7 +276,7 @@ metal[""bear""] = ""kitten""
 		CodeFragment cf = Compiler.Compile( code );
 		r.runSync( cf );
 		string results = dumpScope( r.state );
-		// TestCommon.CompareRef( testName, results );
+		TestCommon.CompareRef( Path.Combine( "Coral", name ), results );
 	}
 
 	string dumpScope( State s )
@@ -285,7 +286,7 @@ metal[""bear""] = ""kitten""
 		foreach( string n in names )
 		{
 			object val = s.scope.get( n );
-			rv += "{0} = {1}\n".FormatI( n, dumpObject( val ) );
+			rv += "{0} = {1}\r\n".FormatI( n, dumpObject( val ) );
 		}
 
 		return rv;

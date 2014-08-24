@@ -1,0 +1,19 @@
+testfunc = <metal function>
+metal = Kayateia.Climoo.Scripting.Coral.MetalObject
+output = Native write: stuff!
+
+Member lookup for foo
+Member foo was read
+Member lookup for foo
+Member foo was written: 10
+Member lookup for bar
+Member bar was written: 0
+Index lookup for 5
+Index 5 was read
+Index lookup for bear
+Index bear was written: kitten
+
+a = 0
+b = 0
+false = False
+true = True
