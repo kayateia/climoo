@@ -92,7 +92,7 @@ x = fib(5)
 		CodeFragment cf = Compiler.Compile( program );
 	}
 
-	// Fails due to an LValue in 'c'
+	// Works
 	[Test]
 	public void Arrays()
 	{
@@ -156,7 +156,7 @@ elif a == 5:
 		runAndDump( "If", program );
 	}
 
-	// Doesn't work: for doesn't deref LValues
+	// Works
 	[Test]
 	public void Functions()
 	{
@@ -170,15 +170,17 @@ def fib(n):
         return fib(n-2) + fib(n-1)
 x = fib(5)
 
+out = """"
 def test(i):
+	pass
 	for j in i:
-		pass
+		out += ""foo""
 test([1,2,3,4])
 ";
 		runAndDump( "Functions", program );
 	}
 
-	// Fails: call isn't deref'ing LValues
+	// Works
 	[Test]
 	public void Strings()
 	{
@@ -210,7 +212,7 @@ d = ""{0} {0}"".format(b)
 					adder( "Index lookup for {0}".FormatI( idx ) );
 					state.pushResult( new LValue()
 					{
-						read = st => { st.pushResult( 0 ); adder( "Index {0} was read".FormatI( idx ) ); },
+						read = st => { adder( "Index {0} was read".FormatI( idx ) ); return 0; },
 						write = (st,val) => { adder( "Index {0} was written: {1}".FormatI( idx, val ) ); }
 					} );
 				},
@@ -219,7 +221,7 @@ d = ""{0} {0}"".format(b)
 					adder( "Member lookup for {0}".FormatI( name ) );
 					state.pushResult( new LValue()
 					{
-						read = st => { st.pushResult( 0 ); adder( "Member {0} was read".FormatI( name ) ); },
+						read = st => { adder( "Member {0} was read".FormatI( name ) ); return 0; },
 						write = (st,val) => { adder( "Member {0} was written: {1}".FormatI( name, val ) ); }
 					} );
 				}
