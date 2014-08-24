@@ -214,6 +214,12 @@ a = ""bob""
 b = a[1]
 c = a.length()
 d = ""{0} {0}"".format(b)
+e = ""{0}_{0}""
+f = e.format(b)
+g = ""a b c d"".split("" "")
+h = ""a b c d"".split("" "",2)
+i = ""a b,c d"".split(["" "", "",""],2)
+j = string.join("","", [""bar"",1,b])
 ";
 		runAndDump( "Strings", program );
 	}
@@ -285,6 +291,10 @@ metal[""bear""] = ""kitten""
 		string[] names = s.scope.getNames();
 		foreach( string n in names )
 		{
+			// Don't include things from the const values.
+			if( s.constScope.has( n ) )
+				continue;
+
 			object val = s.scope.get( n );
 			rv += "{0} = {1}\r\n".FormatI( n, dumpObject( val ) );
 		}
