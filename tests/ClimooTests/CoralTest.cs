@@ -200,7 +200,7 @@ def test(i):
 	pass
 	for j in i:
 		out += ""foo""
-test([1,2,3,4])
+y = test([1,2,3,4])
 ";
 		runAndDump( "Functions", program );
 	}

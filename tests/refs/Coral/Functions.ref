@@ -2,3 +2,4 @@ fib = <def fib(n): <<if ([n] == 0) then <<return 1>>><elif ([n] == 1) then <<ret
 x = 8
 out = foofoofoofoo
 test = <def test(i): <[pass]><<for j in [i], do <([out] += "foo")>>>>
+y = 
