@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Kayateia.Climoo.Scripting.SSharp;
+using Kayateia.Climoo.Scripting.Coral;
 
 /// <summary>
 /// MOO Proxy object for a MOO object attribute. This is available to MOO scripts.
@@ -42,6 +43,7 @@ public class AttrProxy : DynamicObjectBase {
 	/// </summary>
 	/// <value>A proxy object for the mob in question.</value>
 	[Passthrough]
+	[CoralPassthrough]
 	public MobProxy source {
 		get { return new MobProxy(_attr.source, _player); }
 	}
@@ -50,6 +52,7 @@ public class AttrProxy : DynamicObjectBase {
 	/// The name of this attribute.
 	/// </summary>
 	[Passthrough]
+	[CoralPassthrough]
 	public string name {
 		get { return _attr.name; }
 	}
@@ -58,6 +61,7 @@ public class AttrProxy : DynamicObjectBase {
 	/// The MIME type of this attribute's value.
 	/// </summary>
 	[Passthrough]
+	[CoralPassthrough]
 	public string mime {
 		get { return _attr.item.mimetype; }
 	}
@@ -66,6 +70,7 @@ public class AttrProxy : DynamicObjectBase {
 	/// A display string for the attribute's value.
 	/// </summary>
 	[Passthrough]
+	[CoralPassthrough]
 	public string display {
 		get { return _attr.item.display; }
 	}
@@ -74,6 +79,7 @@ public class AttrProxy : DynamicObjectBase {
 	/// The raw bytes comprising the attribute's value.
 	/// </summary>
 	[Passthrough]
+	[CoralPassthrough]
 	public byte[] bytes {
 		get
 		{

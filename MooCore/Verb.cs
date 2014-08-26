@@ -21,7 +21,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Kayateia.Climoo.Scripting.SSharp;
+using SSharp = Kayateia.Climoo.Scripting.SSharp;
+using Coral = Kayateia.Climoo.Scripting.Coral;
 
 /// <summary>
 /// Represents a verb, or fragment of program code attached to a MOO object.
@@ -209,8 +210,8 @@ public class Verb {
 	public string help { get; set; }
 	public string code {
 		get {
-			if (_script != null)
-				return _script.code;
+			if( _code != null )
+				return _code;
 			else
 				return null;
 		}
@@ -220,51 +221,77 @@ public class Verb {
 			if (code.IndexOf('\r') >= 0) {
 				code.Replace("\r\n", "\n");
 			}
+			_code = code;
 
-			if (_script == null)
-				_script = new ScriptFragment(code);
+			// Is it S# or Coral code?
+			if( isCoral( code ) )
+			{
+				// Probably Coral code.
+				_coral = Coral.Compiler.Compile( code );
+			}
 			else
-				_script.code = code;
+			{
+				// Probably S# code.
+				if (_script == null)
+					_script = new SSharp.ScriptFragment(code);
+				else
+					_script.code = code;
+			}
 
 			// Are there method signatures at the top in comment form?
-			if (code.TrimStart().StartsWithI("//verb"))
+			if( isVerbLine( code ) )
 				parseForSignatures();
 		}
 	}
 
+	bool isCoral( string code )
+	{
+		return code.IndexOf( "def " ) >= 0;
+	}
+
+	bool isVerbLine( string code )
+	{
+		code = code.TrimStart();
+		return code.StartsWithI( "//verb" ) || code.StartsWithI( "// verb" )
+			|| code.StartsWithI( "///verb" ) || code.StartsWithI( "/// verb" );
+	}
+
 	void parseForSignatures() {
 		// Split the input into lines, and weed out only the ones with sig values.
-		IEnumerable<string> verbLines = _script.code
+		IEnumerable<string> verbLines = _code
 			.Split('\n')
-			.Select(l => l.Trim())
-			.Where(l => l.TrimStart().StartsWithI("//verb"));
+			.Where(l => isVerbLine( l ) )
+			.Select( l => l.Substring( l.IndexOf( "verb" ) + 4 ).Trim() );
 
 		// Process each one into a sig...
 		List<Sig> newSigs = new List<Sig>();
 		foreach (string verbLine in verbLines) {
 			string[] p = verbLine.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
 			Sig sig = new Sig();
-			if (p[0].EqualsI("//verb*"))
-				sig.wildcard = true;
+			if (p.Length > 0) {
+				if( p[0].EqualsI( "*" ) )
+					sig.wildcard = true;
+				else
+				{
+					// Direct object.
+					sig.dobj = ParseSpecifier(p[0]);
+				}
+			}
 			if (p.Length > 1) {
-				// Direct object.
-				sig.dobj = ParseSpecifier(p[1]);
+				// Preposition.
+				sig.prep = ParsePrep(p[1]);
 			}
 			if (p.Length > 2) {
-				// Preposition.
-				sig.prep = ParsePrep(p[2]);
+				// Indirect object.
+				sig.iobj = ParseSpecifier(p[2]);
 			}
 			if (p.Length > 3) {
-				// Indirect object.
-				sig.iobj = ParseSpecifier(p[3]);
+				// Second preposition.
+				sig.prep2 = ParsePrep(p[3]);
 			}
 			if (p.Length > 4) {
-				// Second preposition.
-				sig.prep2 = ParsePrep(p[4]);
-			}
-			if (p.Length > 5) {
 				// Second indirect object.
-				sig.iobj2 = ParseSpecifier(p[5]);
+				sig.iobj2 = ParseSpecifier(p[4]);
 			}
 			newSigs.Add(sig);
 		}
@@ -375,50 +402,50 @@ public class Verb {
 	public const string VerbParamsKey = "verbparams";
 	public object invoke(VerbParameters param) {
 		// Inject the verb script blob parameters as script variables.
-		var scope = new Scope();
-		scope.set("input", param.input);
-		scope.set("inputwords", param.inputwords);
-		scope.set("self", new Proxies.MobProxy(param.self, param.player));
-		scope.set("obj", new Proxies.MobProxy(param.dobj, param.player));
+		var scope = new Dictionary<string, object>();
+		scope["input"] = param.input;
+		scope["inputwords"] = param.inputwords;
+		scope["self"] = new Proxies.MobProxy(param.self, param.player);
+		scope["obj"] = new Proxies.MobProxy(param.dobj, param.player);
 		if (param.prep != Prep.None)
-			scope.set("prep", param.prep.ToString().ToLowerInvariant());
+			scope["prep"] = param.prep.ToString().ToLowerInvariant();
 		else
-			scope.set("prep", null);
-		scope.set("indobj", new Proxies.MobProxy(param.iobj, param.player));
+			scope["prep"] = null;
+		scope["indobj"] = new Proxies.MobProxy(param.iobj, param.player);
 		if (param.prep2 != Prep.None)
-			scope.set("prep2", param.prep2.ToString().ToLowerInvariant());
+			scope["prep2"] = param.prep2.ToString().ToLowerInvariant();
 		else
-			scope.set("prep2", null);
-		scope.set("indobj2", new Proxies.MobProxy(param.iobj2, param.player));
+			scope["prep2"] = null;
+		scope["indobj2"] = new Proxies.MobProxy(param.iobj2, param.player);
 
-		scope.set("objwords", param.dobjwords);
-		scope.set("prepwords", param.prepwords);
-		scope.set("indobjwords", param.iobjwords);
-		scope.set("prep2words", param.prep2words);
-		scope.set("indobj2words", param.iobj2words);
+		scope["objwords"] = param.dobjwords;
+		scope["prepwords"] = param.prepwords;
+		scope["indobjwords"] = param.iobjwords;
+		scope["prep2words"] = param.prep2words;
+		scope["indobj2words"] = param.iobj2words;
 
 		// Inject some standard MOO objects.
-		scope.set("ambiguous", Proxies.MobProxy.Ambiguous);
-		scope.set("none", Proxies.MobProxy.None);
+		scope["ambiguous"] = Proxies.MobProxy.Ambiguous;
+		scope["none"] = Proxies.MobProxy.None;
 
 		// Inject the player object.
 		Proxies.PlayerProxy player = null;
 		if (param.player != null)
 			player = new Proxies.PlayerProxy( param.player, param.world );
-		scope.set("player", player);
+		scope["player"] = player;
 
 		// "caller" is the same as the player, unless otherwise specified.
 		if (param.caller != null)
-			scope.set("caller", new Proxies.MobProxy(param.caller, param.player));
+			scope["caller"] = new Proxies.MobProxy(param.caller, param.player);
 		else
-			scope.set("caller", player);
+			scope["caller"] = player;
 
-		scope.set("args", param.args);
-		scope.set("world", new Proxies.WorldProxy(param.world, param.player));
-		scope.set("$", new Proxies.MobProxy(param.world.findObject(1), param.player));
-		scope.set( "perms", Proxies.PermBitsProxy.Static );
+		scope["args"] = param.args;
+		scope["world"] = new Proxies.WorldProxy(param.world, param.player);
+		scope["$"] = new Proxies.MobProxy(param.world.findObject(1), param.player);
+		scope["perms"] = Proxies.PermBitsProxy.Static;
 
-		scope.queryForItem = (name) => {
+		Func<string,object> querier = (name) => {
 			if (name.StartsWithI("#")) {
 				int number = CultureFree.ParseInt(name.Substring(1));
 				return new Proxies.MobProxy(param.world.findObject(number), param.player);
@@ -426,13 +453,42 @@ public class Verb {
 			return null;
 		};
 
-		// Pass these on literally to any down-stream invokes.
-		scope.baggageSet(VerbParamsKey, param);
+		if( _script != null )
+		{
+			var ssscope = new SSharp.Scope();
+			ssscope.queryForItem = s => querier(s);
+			foreach( var kv in scope )
+				ssscope.set( kv.Key, kv.Value );
 
-		return _script.execute(scope);
+			// Pass these on literally to any down-stream invokes.
+			ssscope.baggageSet(VerbParamsKey, param);
+
+			return _script.execute(ssscope);
+		}
+		else
+		{
+			var runner = new Coral.Runner();
+			runner.setScopeCallback( querier );
+			foreach( var kv in scope )
+				runner.addToScope( kv.Key, kv.Value );
+
+			// Pass these on literally to any down-stream invokes.
+			runner.state.baggage.set( VerbParamsKey, param );
+
+			// This ought to produce a function called 'verb' in the scope. We'll call that.
+			runner.runSync( _coral );
+			return runner.callFunction( "verb", param.args, typeof( object ) );
+		}
 	}
 
-	ScriptFragment _script;
+	// If this is S# based...
+	SSharp.ScriptFragment _script;
+
+	// If this is Coral based...
+	Coral.CodeFragment _coral;
+
+	// In both cases...
+	string _code;
 
 	//////////////////////////////////////////////////////////////
 	class PrepWrap {
