@@ -8,3 +8,4 @@ g = [a,b,c,d]
 h = [a,b c d]
 i = [a,b,c d]
 j = bar,1,o
+k = tot

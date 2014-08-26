@@ -220,6 +220,7 @@ g = ""a b c d"".split("" "")
 h = ""a b c d"".split("" "",2)
 i = ""a b,c d"".split(["" "", "",""],2)
 j = string.join("","", [""bar"",1,b])
+k = ""test"".replace(""es"", ""o"")
 ";
 		runAndDump( "Strings", program );
 	}
