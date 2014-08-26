@@ -260,6 +260,16 @@ k = ""test"".replace(""es"", ""o"")
 			}
 		);
 		r.state.scope.set( "output", "" );
+		r.setScopeCallback( st =>
+			{
+				if( st.StartsWithI( "#" ) )
+				{
+					return st;
+				}
+				else
+					return null;
+			}
+		);
 
 		string program = @"
 testfunc(""stuff!"")
@@ -268,6 +278,7 @@ metal.foo = 10
 metal.bar = a
 b = metal[5]
 metal[""bear""] = ""kitten""
+c = #10
 ";
 		runAndDump( "Metal", r, program, null );
 	}
