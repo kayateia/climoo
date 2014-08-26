@@ -1,2 +1,5 @@
 a = bar
-object dump: 5 bob [1,2] True Kayateia.Climoo.Tests.CoralTest+PtTest
+b = it's arbitrary, yo
+c = something else
+d = it's arbitrary, yo
+object dump: 5 bob [1,2] True Kayateia.Climoo.Tests.CoralTest+PtTest new value

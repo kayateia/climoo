@@ -272,7 +272,7 @@ metal[""bear""] = ""kitten""
 		runAndDump( "Metal", r, program, null );
 	}
 
-	class PtTest
+	class PtTest : IExtensible
 	{
 		[CoralPassthrough]
 		public void test( int a, string b, string[] c, bool d, PtTest e )
@@ -282,6 +282,7 @@ metal[""bear""] = ""kitten""
 			_c = c;
 			_d = d;
 			_e = e;
+			_f = "";
 		}
 
 		public int _a;
@@ -289,6 +290,7 @@ metal[""bear""] = ""kitten""
 		public string[] _c;
 		public bool _d;
 		public PtTest _e;
+		public string _f;
 
 		[CoralPassthrough]
 		public string property
@@ -304,6 +306,38 @@ metal[""bear""] = ""kitten""
 			}
 		}
 		public string _prop;
+
+		public object getProperty( State state, string name )
+		{
+			if( name == "arbitrary" )
+				return "it's arbitrary, yo";
+			else
+				return "something else";
+		}
+
+		public bool hasProperty( State state, string name )
+		{
+			return name == "arbitrary" || name == "other";
+		}
+
+		public void setProperty( State state, string name, object value )
+		{
+			if( name == "arbitrary" )
+				_f = (string)value;
+		}
+
+		public object callMethod( State state, string name, object[] args )
+		{
+			if( name == "test2" )
+				return "test worked " + String.Join( ",", args.Select( x => x.ToStringI() ).ToArray() );
+			else
+				return null;
+		}
+
+		public bool hasMethod( State state, string name )
+		{
+			return name == "test2";
+		}
 	}
 
 	// Works
@@ -317,12 +351,17 @@ metal[""bear""] = ""kitten""
 pt.test(5, ""bob"", [""1"", ""2""], true, pt)
 pt.property = ""bar""
 a = pt.property
+b = pt.arbitrary
+c = pt.other
+pt.arbitrary = ""new value""
+d = pt.arbitrary
+pt.test2(1, 2, ""3"")
 ";
 		Runner r = new Runner();
 		pter.registerConst( r.state.constScope, "pt" );
 		runAndDump( "Passthrough", r, program,
-			() => "object dump: {0} {1} {2} {3} {4}\r\n".FormatI(
-				dumpObject( pt._a ), dumpObject( pt._b ), dumpObject( pt._c ), dumpObject( pt._d ), dumpObject( pt._e )
+			() => "object dump: {0} {1} {2} {3} {4} {5}\r\n".FormatI(
+				dumpObject( pt._a ), dumpObject( pt._b ), dumpObject( pt._c ), dumpObject( pt._d ), dumpObject( pt._e ), dumpObject( pt._f )
 			) );
 	}
 
