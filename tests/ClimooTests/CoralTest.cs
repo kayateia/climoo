@@ -140,6 +140,7 @@ c = a
 d = a + c
 e = {}
 e.bar = ""baz""
+f = !e.bar
 ";
 		runAndDump( "Assignment", program );
 	}
