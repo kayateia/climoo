@@ -206,6 +206,22 @@ def test(i):
 	for j in i:
 		out += ""foo""
 y = test([1,2,3,4])
+
+out2 = 0
+out3 = 0
+def test2(i):
+	out2 = arguments
+	out3 = i
+test2(1, 2, 3)
+
+outi = 0
+outj = 0
+outk = 0
+def test3(i, j, k):
+	outi = i
+	outj = j
+	outk = k
+test3(1)
 ";
 		runAndDump( "Functions", program );
 	}

@@ -3,3 +3,10 @@ x = 8
 out = foofoofoofoo
 test = <def test(i): <[pass]><<for j in [i], do <([out] += "foo")>>>>
 y = 
+out2 = [1,2,3]
+out3 = 1
+test2 = <def test2(i): <<[out2] = [arguments]>><<[out3] = [i]>>>
+outi = 1
+outj = 
+outk = 
+test3 = <def test3(i,j,k): <<[outi] = [i]>><<[outj] = [j]>><<[outk] = [k]>>>
