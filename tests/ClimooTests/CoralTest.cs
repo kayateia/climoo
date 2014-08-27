@@ -418,6 +418,44 @@ def fib(n):
 		);
 	}
 
+	[Test]
+	public void Exceptions()
+	{
+		string program = @"
+bb = 0
+cc = 0
+dd = 0
+
+def deeper():
+	try:
+		throw { ""name"":""bar"" }
+	except:
+		throw { ""name"":""baz"" }
+	finally:
+		dd = ""yep""
+try:
+	a = 10
+	// throw { ""name"":""Foo"" }
+	deeper()
+except b:
+	bb = b
+finally:
+	cc = ""foo""
+
+ee = 0
+try:
+	try:
+		throw { ""name"": ""e"" }
+	except:
+		pass
+	finally:
+		throw { ""name"": ""f"" }
+except c:
+	ee = c
+";
+		runAndDump( "Exceptions", program );
+	}
+
 	void runAndDump( string name, string code )
 	{
 		Runner r = new Runner();

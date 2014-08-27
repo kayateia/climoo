@@ -1,0 +1,6 @@
+bb = {name:baz}
+cc = foo
+dd = yep
+deeper = <def deeper(): <<try: <<throw {"name":"bar"}> except finally: <<[dd] = "yep">>>>>
+a = 10
+ee = {name:f}
