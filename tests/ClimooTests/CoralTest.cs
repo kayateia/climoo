@@ -141,6 +141,10 @@ d = a + c
 e = {}
 e.bar = ""baz""
 f = !e.bar
+g = e.foogle
+h = e[""boogle""]
+i = null
+j = !null
 ";
 		runAndDump( "Assignment", program );
 	}
