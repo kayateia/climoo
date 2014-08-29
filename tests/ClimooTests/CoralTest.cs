@@ -452,8 +452,29 @@ try:
 		throw { ""name"": ""f"" }
 except c:
 	ee = c
+
+ff = 0
+try:
+	bob = 10 / 0
+except c:
+	ff = c
 ";
-		runAndDump( "Exceptions", program );
+		runAndDump( "Exceptions", new Runner(), program, () =>
+			{
+				string program2 = @"throw { ""name"": ""escaped"", ""message"":""Whee, I'm free!"" }";
+				CodeFragment cf = Compiler.Compile( program2 );
+				try
+				{
+					var r = new Runner();
+					r.runSync( cf );
+					return "second test failed";
+				}
+				catch( CoralException ex )
+				{
+					return "second test succeeded: {0}, {1}".FormatI( ex.name, ex.Message );
+				}
+			}
+		);
 	}
 
 	[Test]
