@@ -362,13 +362,67 @@ c = #10
 		{
 			if( name == "test2" )
 				return "test worked " + String.Join( ",", args.Select( x => x.ToStringI() ).ToArray() );
+			else if( name == "complex" )
+			{
+				int which = (int)args[0];
+				if( which == 1 )
+				{
+					return new AsyncAction()
+					{
+						action = AsyncAction.Action.Call,
+						name = "func",
+						args = new object[] { "added\r\n" }
+					};
+				}
+				else if( which == 2 )
+				{
+					return new AsyncAction[]
+					{
+						new AsyncAction()
+						{
+							action = AsyncAction.Action.Variable,
+							name = "shouldexist",
+							value = "oh cool"
+						},
+						new AsyncAction()
+						{
+							action = AsyncAction.Action.Callback,
+							callback = st =>
+								{
+									var rv = "{0}".FormatI( st.scope.get( "shouldexist" ) );
+									st.pushResult( rv );
+								}
+						}
+					};
+				}
+				else /*if( which == 3 )*/
+				{
+					return new AsyncAction[]
+					{
+						new AsyncAction()
+						{
+							action = AsyncAction.Action.Code,
+							code = Compiler.Compile( @"
+def innerfunc(x):
+	return x + 1
+")
+						},
+						new AsyncAction()
+						{
+							action = AsyncAction.Action.Call,
+							name = "innerfunc",
+							args = new object[] { 5 }
+						}
+					};
+				}
+			}
 			else
 				return null;
 		}
 
 		public bool hasMethod( State state, string name )
 		{
-			return name == "test2";
+			return name == "test2" || name == "complex";
 		}
 	}
 
@@ -388,6 +442,15 @@ c = pt.other
 pt.arbitrary = ""new value""
 d = pt.arbitrary
 pt.test2(1, 2, ""3"")
+
+e = """"
+def func(x):
+	e += x
+
+pt.complex(1)
+f = pt.complex(2)
+g = pt.complex(3)
+
 ";
 		Runner r = new Runner();
 		pter.registerConst( r.state.constScope, "pt" );

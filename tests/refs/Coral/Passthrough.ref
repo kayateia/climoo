@@ -2,4 +2,9 @@ a = bar
 b = it's arbitrary, yo
 c = something else
 d = it's arbitrary, yo
+e = added
+
+func = <def func(x): <([e] += [x])>>
+f = oh cool
+g = 6
 object dump: 5 bob [1,2] True Kayateia.Climoo.Tests.CoralTest+PtTest new value
