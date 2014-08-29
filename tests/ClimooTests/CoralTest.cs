@@ -456,6 +456,62 @@ except c:
 		runAndDump( "Exceptions", program );
 	}
 
+	[Test]
+	public void CompilationErrors()
+	{
+		string rv = "";
+
+		rv += "Test 1:\r\n";
+		rv += catchCompileErrors( @"
+// some text
+def thisworks(args):
+	pass
+"
+		);
+
+		rv += "Test 2:\r\n";
+		rv += catchCompileErrors( @"
+// some text
+def this is a parsing error(args):
+	pass
+"
+		);
+
+		rv += "Test 3:\r\n";
+		rv += catchCompileErrors( @"
+// some text
+def thisworks(args):
+	if args.length() > 5:
+		args = [asdf qwef asdf asdf]
+"
+		);
+
+		TestCommon.CompareRef( Path.Combine( "Coral", "CompilationErrors" ), rv );
+	}
+
+	string catchCompileErrors( string code )
+	{
+		string rv = "";
+		try
+		{
+			CodeFragment cf = Compiler.Compile( code );
+			if( cf.success )
+				rv += "compiled successfully\r\n";
+			else
+			{
+				foreach( var err in cf.errors )
+				{
+					rv += "line {0} col {1}: {2}\r\n".FormatI( err.line, err.col, err.message );
+				}
+			}
+		} catch( Exception ex )
+		{
+			rv += "exception:\r\n" + ex.ToStringI() + "\r\n";
+		}
+
+		return rv;
+	}
+
 	void runAndDump( string name, string code )
 	{
 		Runner r = new Runner();
