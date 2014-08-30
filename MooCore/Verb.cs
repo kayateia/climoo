@@ -227,7 +227,7 @@ public class Verb {
 			if( isCoral( code ) )
 			{
 				// Probably Coral code.
-				_coral = Coral.Compiler.Compile( code );
+				_coral = Coral.Compiler.Compile( this.name, code );
 			}
 			else
 			{
@@ -477,7 +477,7 @@ public class Verb {
 
 			// This ought to produce a function called 'verb' in the scope. We'll call that.
 			runner.runSync( _coral );
-			return runner.callFunction( "verb", param.args, typeof( object ) );
+			return runner.callFunction( "verb", param.args, typeof( object ), new Coral.StackTrace.StackFrame() );
 		}
 	}
 

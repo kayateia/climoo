@@ -96,7 +96,7 @@ def fib(n):
 
 x = fib(5)
 ";
-		CodeFragment cf = Compiler.Compile( program );
+		CodeFragment cf = Compiler.Compile( "test", program );
 	}
 
 	// Works
@@ -374,7 +374,14 @@ c = #10
 					{
 						action = AsyncAction.Action.Call,
 						function = (FValue)args[1],
-						args = new object[] { "added\r\n" }
+						args = new object[] { "added\r\n" },
+						frame = new StackTrace.StackFrame()
+						{
+							line = 0,
+							col = 0,
+							unitName = "test",
+							funcName = "PtTest.{0}".FormatI( name )
+						}
 					};
 				}
 				else if( which == 2 )
@@ -405,16 +412,23 @@ c = #10
 						new AsyncAction()
 						{
 							action = AsyncAction.Action.Code,
-							code = Compiler.Compile( @"
+							code = Compiler.Compile( "test", @"
 def innerfunc(x):
 	return x + 1
-")
+" )
 						},
 						new AsyncAction()
 						{
 							action = AsyncAction.Action.Call,
 							name = "innerfunc",
-							args = new object[] { 5 }
+							args = new object[] { 5 },
+							frame = new StackTrace.StackFrame()
+							{
+								line = 0,
+								col = 0,
+								unitName = "test",
+								funcName = "PtTest.{0}".FormatI( name )
+							}
 						}
 					};
 				}
@@ -478,7 +492,7 @@ def fib(n):
 		Runner r = new Runner();
 		runAndDump( "CallFunc", r, program, () =>
 			{
-				object rv = r.callFunction( "fib", new object[] { 5 }, typeof( int ) );
+				object rv = r.callFunction( "fib", new object[] { 5 }, typeof( int ), new StackTrace.StackFrame() );
 				return "function return value: {0}".FormatI( dumpObject( rv ) );
 			}
 		);
@@ -528,7 +542,7 @@ except c:
 		runAndDump( "Exceptions", new Runner(), program, () =>
 			{
 				string program2 = @"throw { ""name"": ""escaped"", ""message"":""Whee, I'm free!"" }";
-				CodeFragment cf = Compiler.Compile( program2 );
+				CodeFragment cf = Compiler.Compile( "test", program2 );
 				try
 				{
 					var r = new Runner();
@@ -581,7 +595,7 @@ def thisworks(args):
 		string rv = "";
 		try
 		{
-			CodeFragment cf = Compiler.Compile( code );
+			CodeFragment cf = Compiler.Compile( "test", code );
 			if( cf.success )
 				rv += "compiled successfully\r\n";
 			else
@@ -599,6 +613,115 @@ def thisworks(args):
 		return rv;
 	}
 
+	class ClimooObj : IExtensible
+	{
+		public ClimooObj( string code )
+		{
+			_code = Compiler.Compile( "second", code );
+		}
+
+		CodeFragment _code;
+
+		public object getProperty( State state, string name ) { return null; }
+		public bool hasProperty( State state, string name ) { return false; }
+		public void setProperty( State state, string name, object value ) { }
+
+		public object callMethod( State state, string name, object[] args )
+		{
+			if( name == "other" )
+			{
+				Runner r = new Runner();
+				r.runSync( _code );
+				return new AsyncAction()
+				{
+					action = AsyncAction.Action.Call,
+					function = (FValue)r.state.scope.get( "verb" ),
+					args = args,
+					frame = new StackTrace.StackFrame()
+				};
+			}
+			else if( name == "thrower" )
+			{
+				Runner r = new Runner();
+				r.runSync( _code );
+				return new AsyncAction()
+				{
+					action = AsyncAction.Action.Call,
+					function = (FValue)r.state.scope.get( "thrower" ),
+					args = args,
+					frame = new StackTrace.StackFrame()
+				};
+			}
+			else
+				throw new NotImplementedException();
+		}
+
+		public bool hasMethod( State state, string name ) { return true; }
+	}
+
+	[Test]
+	public void Climoo()
+	{
+		// This test does its best to simulate some conditions that might occur during
+		// normal use within Climoo. It tests things like cross-module calls and exceptions.
+		string program1 = @"
+def verb(arg1, arg2):
+	arg1.other(arg2)
+
+def verb2(arg1):
+	arg1.thrower()
+";
+		string program2 = @"
+def verb(arg):
+	arg.foo = ""test""
+
+def thrower():
+	inner()
+
+def inner():
+	throw { ""name"":""inner_exception"" }
+";
+		CodeFragment prog1 = Compiler.Compile( "verb1", program1 );
+		var obj = new ClimooObj( program2 );
+
+		Runner r = new Runner();
+		r.runSync( prog1 );
+		var dictObj = new Dictionary<object, object>();
+		dictObj["foo"] = "unset";
+		r.state.scope.set( "test", dictObj );
+
+		string rv = "";
+		try
+		{
+			r.callFunction( "verb", new object[] {
+				obj,
+				dictObj
+			}, typeof( object ), new StackTrace.StackFrame() );
+		}
+		catch( Exception ex )
+		{
+			rv += "Exception: " + ex + "\r\n";
+		}
+
+		try
+		{
+			r.callFunction( "verb2", new object[] {
+				obj
+			}, typeof( object ), new StackTrace.StackFrame() );
+		}
+		catch( CoralException ex )
+		{
+			rv += "CoralException: " + dumpObject( ex.data ) + "\r\n";
+		}
+		catch( Exception ex )
+		{
+			rv += "Exception: " + ex + "\r\n";
+		}
+
+		string results = dumpScope( r.state ) + rv;
+		TestCommon.CompareRef( Path.Combine( "Coral", "Climoo" ), results );
+	}
+
 	void runAndDump( string name, string code )
 	{
 		Runner r = new Runner();
@@ -607,7 +730,7 @@ def thisworks(args):
 
 	void runAndDump( string name, Runner r, string code, Func<string> extra )
 	{
-		CodeFragment cf = Compiler.Compile( code );
+		CodeFragment cf = Compiler.Compile( "test", code );
 		r.runSync( cf );
 		string results = dumpScope( r.state );
 		if( extra != null )

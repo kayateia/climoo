@@ -1,0 +1,4 @@
+verb = <def verb(arg1,arg2): <<call [[arg1].other]([arg2])>>>
+verb2 = <def verb2(arg1): <<call [[arg1].thrower]()>>>
+test = {foo:test}
+CoralException: {name:inner_exception,trace:[ second:9,9 <throw {"name":"inner_exception"}>, second:6,9 <call [inner]()>, <anon>:0,0 <call Kayateia.Climoo.Scripting.Coral.FValue()>, verb1:6,9 <call [[arg1].thrower]()>, <anon>:0,0 <call [verb2](Kayateia.Climoo.Scripting.Coral.Passthrough+PassthroughMetalObject)>]}
