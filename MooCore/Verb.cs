@@ -467,6 +467,17 @@ public class Verb {
 		}
 		else
 		{
+			// Is the verb valid / compiled properly?
+			if( !_coral.success )
+			{
+				player.write( "Verb was not properly compiled." );
+				if( _coral.errors != null )
+				{
+					foreach( var err in _coral.errors )
+						player.write( " line {0}, col {1}: {2}".FormatI( err.line, err.col, err.message ) );
+				}
+				return null;
+			}
 			var runner = new Coral.Runner();
 			runner.setScopeCallback( querier );
 			foreach( var kv in scope )
