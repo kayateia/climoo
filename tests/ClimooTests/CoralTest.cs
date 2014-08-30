@@ -256,6 +256,9 @@ k = ""test"".replace(""es"", ""o"")
 				r.state.scope.get( "output" ) + s + "\r\n" );
 		r.state.scope.set( "testfunc",
 			new FValue( (state, ps) => adder( "Native write: {0}\r\n".FormatI( ps[0] ) ) )
+			{
+				scope = r.state.scope
+			}
 		);
 		r.state.scope.set( "metal",
 			new MetalObject()
@@ -370,7 +373,7 @@ c = #10
 					return new AsyncAction()
 					{
 						action = AsyncAction.Action.Call,
-						name = "func",
+						function = (FValue)args[1],
 						args = new object[] { "added\r\n" }
 					};
 				}
@@ -447,7 +450,7 @@ e = """"
 def func(x):
 	e += x
 
-pt.complex(1)
+pt.complex(1, func)
 f = pt.complex(2)
 g = pt.complex(3)
 
