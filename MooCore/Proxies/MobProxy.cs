@@ -473,7 +473,7 @@ public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 		newparam.caller = param.self;
 		newparam.args = args;
 
-		return v.invoke(newparam);
+		return v.invoke( newparam, false );
 	}
 
 
@@ -512,7 +512,7 @@ public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 		newparam.caller = param.self;
 		newparam.args = args;
 
-		return v.invoke(newparam);
+		return v.invoke( newparam, true );
 	}
 
 	public bool hasMethod( State state, string name )

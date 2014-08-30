@@ -399,8 +399,14 @@ public class Verb {
 		return false;
 	}
 
+	public object invoke( VerbParameters param )
+	{
+		return invoke( param, false );
+	}
+
 	public const string VerbParamsKey = "verbparams";
-	public object invoke(VerbParameters param) {
+	public object invoke( VerbParameters param, bool coralContinuation )
+	{
 		// Inject the verb script blob parameters as script variables.
 		var scope = new Dictionary<string, object>();
 		scope["input"] = param.input;
@@ -478,6 +484,8 @@ public class Verb {
 				}
 				return null;
 			}
+
+			// We have to run the code first, for it to define its verb.
 			var runner = new Coral.Runner();
 			runner.setScopeCallback( querier );
 			foreach( var kv in scope )
@@ -488,7 +496,33 @@ public class Verb {
 
 			// This ought to produce a function called 'verb' in the scope. We'll call that.
 			runner.runSync( _coral );
-			return runner.callFunction( "verb", param.args, typeof( object ), new Coral.StackTrace.StackFrame() );
+
+			Coral.StackTrace.StackFrame frame = new Coral.StackTrace.StackFrame()
+			{
+				unitName = "<climoo>",
+				funcName = "<trampoline>"
+			};
+
+			// If we came from Coral and we're going to Coral, use a continuation.
+			if( coralContinuation )
+			{
+				// Pull the FValue of the function we just loaded.
+				Coral.FValue fv = (Coral.FValue)runner.state.scope.get( "verb" );
+
+				// If there wasn't one, throw a sensible error.
+				if( fv == null )
+					throw new InvalidOperationException( "'verb' was not defined in the verb code container" );
+
+				return new Coral.AsyncAction()
+				{
+					action = Coral.AsyncAction.Action.Call,
+					function = fv,
+					args = param.args,
+					frame = frame
+				};
+			}
+			else
+				return runner.callFunction( "verb", param.args, typeof( object ), frame );
 		}
 	}
 
