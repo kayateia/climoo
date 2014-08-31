@@ -43,7 +43,22 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="CoralTest.cs" />
+    <Compile Include="Coral\Assignment.cs" />
+    <Compile Include="Coral\CallFunc.cs" />
+    <Compile Include="Coral\CompilationErrors.cs" />
+    <Compile Include="Coral\Climoo.cs" />
+    <Compile Include="Coral\Escapes.cs" />
+    <Compile Include="Coral\OnlyDefs.cs" />
+    <Compile Include="Coral\Exceptions.cs" />
+    <Compile Include="Coral\Passthrough.cs" />
+    <Compile Include="Coral\Metal.cs" />
+    <Compile Include="Coral\Strings.cs" />
+    <Compile Include="Coral\Functions.cs" />
+    <Compile Include="Coral\If.cs" />
+    <Compile Include="Coral\For.cs" />
+    <Compile Include="Coral\Dictionaries.cs" />
+    <Compile Include="Coral\CoralTestCommon.cs" />
+    <Compile Include="Coral\Arrays.cs" />
     <Compile Include="CoreDatabaseTest.cs" />
     <Compile Include="DatabaseMemory.cs" />
     <Compile Include="DatabaseCommon.cs" />
