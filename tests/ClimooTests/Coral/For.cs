@@ -43,6 +43,12 @@ for i in [1,2,3,4,5]:
 	j += i
 	if i == 3:
 		break
+
+k = 0
+for i in [1,2,3,4,5]:
+	if i == 3:
+		continue
+	k += i
 ";
 		runAndDump( "For", program );
 	}

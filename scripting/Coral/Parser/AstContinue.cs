@@ -17,50 +17,38 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #endregion
-namespace Kayateia.Climoo.Tests
+namespace Kayateia.Climoo.Scripting.Coral
 {
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using NUnit.Framework;
-using Kayateia.Climoo.Scripting.Coral;
 
 /// <summary>
-/// Tests for the Coral scripting language.
+/// Loops back to the beginning of a for loop.
 /// </summary>
-[TestFixture]
-public partial class CoralTest
+class AstContinue : AstNode
 {
-	[Test]
-	public void While()
+	public override bool convert( Irony.Parsing.ParseTreeNode node, Compiler c )
 	{
-		string program = @"
-i = """"
-j = 0
-while j < 10:
-	i += ""a""
-	j += 1
+		base.convert( node, c );
+		if( node.Term.Name == "ContinueStmt" )
+		{
+			return true;
+		}
 
-k = """"
-l = 0
-while l < 10:
-	k += ""b""
-	l += 1
-	if l >= 5:
-		break
+		return false;
+	}
 
-m = -1
-ns = [""a"", ""b"", ""c"", ""d"", ""e""]
-n = """"
-while m < 5:
-	m += 1
-	if m == 3:
-		continue
-	n += ns[m]
-";
-		runAndDump( "While", program );
+	public override void run( State state )
+	{
+		// We execute here by searching up the stack for the for loop block
+		// marker, then unwinding up to it.
+		state.pushAction( new Step( this, st =>
+		{
+			st.unwindActions( step => AstFor.IsBlockMarker( step ) || AstWhile.IsBlockMarker( step ), true );
+		}, "continue: stack unwinder" ) );
+	}
+
+	public override string ToString()
+	{
+		return "<continue>";
 	}
 }
 
