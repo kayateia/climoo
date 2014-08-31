@@ -17,38 +17,42 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #endregion
-namespace Kayateia.Climoo.Scripting.Coral
+namespace Kayateia.Climoo.Tests
 {
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Text;
+using NUnit.Framework;
+using Kayateia.Climoo.Scripting.Coral;
 
 /// <summary>
-/// Breaks out of a for loop.
+/// Tests for the Coral scripting language.
 /// </summary>
-class AstBreak : AstNode
+[TestFixture]
+public partial class CoralTest
 {
-	public override bool convert( Irony.Parsing.ParseTreeNode node, Compiler c )
+	// Needs "continue" once that's in. Otherwise works.
+	[Test]
+	public void While()
 	{
-		base.convert( node, c );
-		if( node.Term.Name == "BreakStmt" )
-		{
-			return true;
-		}
+		string program = @"
+i = """"
+j = 0
+while j < 10:
+	i += ""a""
+	j += 1
 
-		return false;
-	}
-
-	public override void run( State state )
-	{
-		// We execute here by searching up the stack for the for loop scope
-		// marker, then unwinding past that.
-		state.pushAction( new Step( this, st =>
-		{
-			st.unwindActions( step => AstFor.IsScopeMarker( step ) || AstWhile.IsLoopMarker( step ) );
-		}, "break: stack unwinder" ) );
-	}
-
-	public override string ToString()
-	{
-		return "<break>";
+k = """"
+l = 0
+while l < 10:
+	k += ""b""
+	l += 1
+	if l >= 5:
+		break
+";
+		runAndDump( "While", program );
 	}
 }
 
