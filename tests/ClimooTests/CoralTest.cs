@@ -759,6 +759,13 @@ if b:
 		return "Test is{0} compliant\r\n".FormatI( cf.verifyOnlyDefs() ? "": " not" );
 	}
 
+	[Test]
+	public void Escapes()
+	{
+		string code = @"a = ""\tbar!\r\n\\foo""";
+		runAndDump( "Escapes", code );
+	}
+
 	void runAndDump( string name, string code )
 	{
 		Runner r = new Runner();
