@@ -27,7 +27,7 @@ using NUnit.Framework;
 using Kayateia.Climoo.Scripting.Coral;
 
 /// <summary>
-/// This simple test just tests NUnit's functioning. This may go away eventually.
+/// Tests for the Coral scripting language.
 /// </summary>
 [TestFixture]
 public class CoralTest
@@ -720,6 +720,43 @@ def inner():
 
 		string results = dumpScope( r.state ) + rv;
 		TestCommon.CompareRef( Path.Combine( "Coral", "Climoo" ), results );
+	}
+
+	[Test]
+	public void OnlyDefs()
+	{
+		string progPositive1 = @"
+def a():
+	pass
+";
+		string progPositive2 = @"
+def a():
+	pass
+def b():
+	pass
+";
+		string progNegative1 = @"
+if a:
+	pass
+";
+		string progNegative2 = @"
+def a():
+	pass
+if b:
+	pass
+";
+		string rv = "";
+		rv += testOnlyDefs( progPositive1 );
+		rv += testOnlyDefs( progPositive2 );
+		rv += testOnlyDefs( progNegative1 );
+		rv += testOnlyDefs( progNegative2 );
+		TestCommon.CompareRef( Path.Combine( "Coral", "OnlyDefs" ), rv );
+	}
+
+	string testOnlyDefs( string code )
+	{
+		var cf = Compiler.Compile( "test", code );
+		return "Test is{0} compliant\r\n".FormatI( cf.verifyOnlyDefs() ? "": " not" );
 	}
 
 	void runAndDump( string name, string code )
