@@ -229,7 +229,6 @@ public class Verb {
 				// Probably Coral code.
 				_coral = Coral.Compiler.Compile( this.name, code );
 				_coral.errorIfNotOnlyDefs();
-				this.codeType = CodeType.Coral;
 			}
 			else
 			{
