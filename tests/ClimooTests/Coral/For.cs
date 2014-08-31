@@ -49,6 +49,22 @@ for i in [1,2,3,4,5]:
 	if i == 3:
 		continue
 	k += i
+
+m = 0
+for l=5,l<10,l+=1:
+	m += l
+
+n = 0
+for l=5,l<10,l+=1:
+	n += l
+	if l == 7:
+		break
+
+p = 0
+for l=5,l<10,l+=1:
+	if l == 7:
+		continue
+	p += l
 ";
 		runAndDump( "For", program );
 	}
