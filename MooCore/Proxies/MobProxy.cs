@@ -391,6 +391,19 @@ public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 	}
 
 	/// <summary>
+	/// True if this object represents a player that's not logged in.
+	/// </summary>
+	[Passthrough]
+	[CoralPassthrough]
+	public bool sleeping
+	{
+		get
+		{
+			return this.sentient && _mob.player == null;
+		}
+	}
+
+	/// <summary>
 	/// Gets the mob we contain (for non-script only).
 	/// </summary>
 	public Mob get
