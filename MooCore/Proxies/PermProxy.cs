@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Kayateia.Climoo.Scripting.SSharp;
+using Kayateia.Climoo.Scripting.Coral;
 
 /// <summary>
 /// Provides really simple constants for use in scripts. It's fine to just pull the static instance of this
@@ -37,39 +38,51 @@ public class PermBitsProxy : DynamicObjectBase {
 	static PermBitsProxy s_perm = new PermBitsProxy();
 
 	[Passthrough]
+	[CoralPassthrough]
 	public int ar { get { return PermBits.AR; } }
 
 	[Passthrough]
+	[CoralPassthrough]
 	public int aw { get { return PermBits.AW; } }
 
 	[Passthrough]
+	[CoralPassthrough]
 	public int ao { get { return PermBits.AO; } }
 
 	[Passthrough]
+	[CoralPassthrough]
 	public int vr { get { return PermBits.VR; } }
 
 	[Passthrough]
+	[CoralPassthrough]
 	public int vw { get { return PermBits.VW; } }
 
 	[Passthrough]
+	[CoralPassthrough]
 	public int or { get { return PermBits.OR; } }
 
 	[Passthrough]
+	[CoralPassthrough]
 	public int ow { get { return PermBits.OW; } }
 
 	[Passthrough]
+	[CoralPassthrough]
 	public int om { get { return PermBits.OM; } }
 
 	[Passthrough]
+	[CoralPassthrough]
 	public int of { get { return PermBits.OF; } }
 
 	[Passthrough]
+	[CoralPassthrough]
 	public int attr { get { return PermBits.Attr; } }
 
 	[Passthrough]
+	[CoralPassthrough]
 	public int verb { get { return PermBits.Verb; } }
 
 	[Passthrough]
+	[CoralPassthrough]
 	public int obj { get { return PermBits.Obj; } }
 }
 
@@ -92,6 +105,7 @@ public class PermProxy : DynamicObjectBase, IProxy
 	}
 
 	[Passthrough]
+	[CoralPassthrough]
 	public MobProxy actor
 	{
 		get
@@ -110,6 +124,7 @@ public class PermProxy : DynamicObjectBase, IProxy
 	}
 
 	[Passthrough]
+	[CoralPassthrough]
 	public int actorId
 	{
 		get
@@ -124,6 +139,7 @@ public class PermProxy : DynamicObjectBase, IProxy
 	}
 
 	[Passthrough]
+	[CoralPassthrough]
 	public StringI type
 	{
 		get
@@ -146,6 +162,7 @@ public class PermProxy : DynamicObjectBase, IProxy
 	}
 
 	[Passthrough]
+	[CoralPassthrough]
 	public int permbits
 	{
 		get
@@ -160,6 +177,7 @@ public class PermProxy : DynamicObjectBase, IProxy
 	}
 
 	[Passthrough]
+	[CoralPassthrough]
 	public StringI specific
 	{
 		get
@@ -182,6 +200,7 @@ public class PermProxy : DynamicObjectBase, IProxy
 	}
 
 	[Passthrough]
+	[CoralPassthrough]
 	public override string ToString()
 	{
 		return _perm.ToStringI();

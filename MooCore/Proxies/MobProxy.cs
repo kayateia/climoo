@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Kayateia.Climoo.Scripting.SSharp;
+using Kayateia.Climoo.Scripting.Coral;
 
 /// <summary>
 /// Scripting proxy for Mobs (MOO objects). This is available to MOO scripts.
@@ -30,7 +31,7 @@ using Kayateia.Climoo.Scripting.SSharp;
 /// Everything in here that we provide access to, random scripts also
 /// have access to. So this needs to provide security as well.
 /// </remarks>
-public class MobProxy : DynamicObjectBase, IProxy {
+public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 	internal MobProxy(Mob mob, Player player) {
 		_mob = mob;
 		_player = player;
@@ -56,12 +57,14 @@ public class MobProxy : DynamicObjectBase, IProxy {
 	/// The mob's world ID.
 	/// </summary>
 	[Passthrough]
+	[CoralPassthrough]
 	public int id { get { return _mob.id; } }
 
 	/// <summary>
 	/// The mob's parent's world ID. This is the mob's OOP inheritance base.
 	/// </summary>
 	[Passthrough]
+	[CoralPassthrough]
 	public int parentId {
 		get { return _mob.parentId; }
 		set { _mob.parentId = value; }
@@ -71,6 +74,7 @@ public class MobProxy : DynamicObjectBase, IProxy {
 	/// The mob's parent mob. This is the mob's OOP inheritance base.
 	/// </summary>
 	[Passthrough]
+	[CoralPassthrough]
 	public MobProxy parent {
 		get {
 			return new MobProxy(_mob.world.findObject(_mob.parentId), _player);
@@ -84,6 +88,7 @@ public class MobProxy : DynamicObjectBase, IProxy {
 	/// The mob's location's world ID.
 	/// </summary>
 	[Passthrough]
+	[CoralPassthrough]
 	public int locationId {
 		get { return _mob.locationId; }
 		set { _mob.locationId = value; }
@@ -93,6 +98,7 @@ public class MobProxy : DynamicObjectBase, IProxy {
 	/// The mob's location mob.
 	/// </summary>
 	[Passthrough]
+	[CoralPassthrough]
 	public MobProxy location {
 		get {
 			return new MobProxy(_mob.world.findObject(_mob.locationId), _player);
@@ -106,6 +112,7 @@ public class MobProxy : DynamicObjectBase, IProxy {
 	/// The mob's description.
 	/// </summary>
 	[Passthrough]
+	[CoralPassthrough]
 	public string desc {
 		get { return _mob.desc; }
 		set { _mob.desc = value; }
@@ -115,18 +122,21 @@ public class MobProxy : DynamicObjectBase, IProxy {
 	/// Returns true if the mob represents a sentient object, e.g. a player.
 	/// </summary>
 	[Passthrough]
+	[CoralPassthrough]
 	public bool sentient { get { return _mob.isDescendentOf(_mob.world.findObject("/templates/player").id); } }
 
 	/// <summary>
 	/// Returns the mob's fully qualified path name.
 	/// </summary>
 	[Passthrough]
+	[CoralPassthrough]
 	public string fqpn { get { return _mob.fqpn; } }
 
 	/// <summary>
 	/// The mob's owner's mob. This is for permission purposes.
 	/// </summary>
 	[Passthrough]
+	[CoralPassthrough]
 	public MobProxy owner {
 		get {
 			return new MobProxy(_mob.owner, _player);
@@ -141,6 +151,7 @@ public class MobProxy : DynamicObjectBase, IProxy {
 	/// If this mob represents a player, this returns a Player object for it. Otherwise, returns null.
 	/// </summary>
 	[Passthrough]
+	[CoralPassthrough]
 	public PlayerProxy player {
 		get {
 			if (_mob.player == null)
@@ -154,6 +165,7 @@ public class MobProxy : DynamicObjectBase, IProxy {
 	/// Returns an array of all mobs contained within this mob.
 	/// </summary>
 	[Passthrough]
+	[CoralPassthrough]
 	public MobProxy[] contained {
 		get {
 			return (from m in _mob.contained select new MobProxy(m, _player)).ToArray();
@@ -164,9 +176,10 @@ public class MobProxy : DynamicObjectBase, IProxy {
 	/// Returns all of the attributes of this mob.
 	/// </summary>
 	[Passthrough]
-	public IEnumerable<AttrProxy> attributes {
+	[CoralPassthrough]
+	public AttrProxy[] attributes {
 		get {
-			return from a in _mob.allAttrs select new AttrProxy(a.Value, _player);
+			return (from a in _mob.allAttrs select new AttrProxy( a.Value, _player )).ToArray();
 		}
 	}
 
@@ -174,9 +187,10 @@ public class MobProxy : DynamicObjectBase, IProxy {
 	/// Returns all of the verbs of this mob.
 	/// </summary>
 	[Passthrough]
-	public IEnumerable<VerbProxy> verbs {
+	[CoralPassthrough]
+	public VerbProxy[] verbs {
 		get {
-			return from a in _mob.allVerbs select new VerbProxy(a.Value, _player);
+			return (from a in _mob.allVerbs select new VerbProxy( a.Value, _player )).ToArray();
 		}
 	}
 
@@ -184,6 +198,7 @@ public class MobProxy : DynamicObjectBase, IProxy {
 	/// Returns true if the mob has the specified verb.
 	/// </summary>
 	[Passthrough]
+	[CoralPassthrough]
 	public bool hasVerb(string verb) {
 		return _mob.findVerb(verb) != null;
 	}
@@ -192,6 +207,7 @@ public class MobProxy : DynamicObjectBase, IProxy {
 	/// Deletes the specified verb from the mob.
 	/// </summary>
 	[Passthrough]
+	[CoralPassthrough]
 	public void verbDel(string verb) {
 		_mob.verbDel(verb);
 	}
@@ -200,6 +216,7 @@ public class MobProxy : DynamicObjectBase, IProxy {
 	/// Gets the specified verb's program code if it exists on the mob.
 	/// </summary>
 	[Passthrough]
+	[CoralPassthrough]
 	public string verbGet(string verb) {
 		// TODO: Should this be a new VerbProxy?
 		return _mob.verbGet(verb).code;
@@ -209,6 +226,7 @@ public class MobProxy : DynamicObjectBase, IProxy {
 	/// Sets the specified verb's program code on the mob.
 	/// </summary>
 	[Passthrough]
+	[CoralPassthrough]
 	public void verbSet(string verb, string code) {
 		MooCore.Verb v = new MooCore.Verb() {
 			name = verb,
@@ -221,6 +239,7 @@ public class MobProxy : DynamicObjectBase, IProxy {
 	/// Gets the specified attribute on the mob, if it exists.
 	/// </summary>
 	[Passthrough]
+	[CoralPassthrough]
 	public AttrProxy attrGet(string id) {
 		TypedAttribute attr = _mob.findAttribute(id); 
 		if (attr == null)
@@ -235,6 +254,7 @@ public class MobProxy : DynamicObjectBase, IProxy {
 	/// if the attribute is an image.
 	/// </summary>
 	[Passthrough]
+	[CoralPassthrough]
 	public object attrUnboxed(string id) {
 		TypedAttribute ta = _mob.findAttribute(id);
 		if (ta == null)
@@ -253,6 +273,7 @@ public class MobProxy : DynamicObjectBase, IProxy {
 	/// Sets the attribute value.
 	/// </summary>
 	[Passthrough]
+	[CoralPassthrough]
 	public void attrSet(string id, object val) {
 		val = Proxy.Deproxify( val );
 		_mob.attrSet( id, TypedAttribute.FromValue( val ) );
@@ -262,12 +283,14 @@ public class MobProxy : DynamicObjectBase, IProxy {
 	/// Deletes the specified attribute, if it exists.
 	/// </summary>
 	[Passthrough]
+	[CoralPassthrough]
 	public void attrDel(string id) {
 		_mob.attrDel(id);
 	}
 
 	// Because of the way the S# runtime works, this allows us to override ==.
 	[Passthrough]
+	[CoralPassthrough]
 	public override bool Equals(object obj) {
 		// Only special case mobs here. If it's something more complicated, equality can fail.
 		if (obj == null || !(obj is MobProxy))
@@ -284,6 +307,7 @@ public class MobProxy : DynamicObjectBase, IProxy {
 	/// Relocates this mob to another location mob.
 	/// </summary>
 	[Passthrough]
+	[CoralPassthrough]
 	public void moveTo(MobProxy target) {
 		_mob.locationId = target._mob.id;
 	}
@@ -292,6 +316,7 @@ public class MobProxy : DynamicObjectBase, IProxy {
 	/// Relocates this mob to another location mob, by id.
 	/// </summary>
 	[Passthrough]
+	[CoralPassthrough]
 	public void moveTo(int targetId) {
 		_mob.locationId = targetId;
 	}
@@ -300,6 +325,7 @@ public class MobProxy : DynamicObjectBase, IProxy {
 	/// Relocates this mob to another location mob, by path.
 	/// </summary>
 	[Passthrough]
+	[CoralPassthrough]
 	public MobProxy moveTo(string targetName) {
 		Mob m = InputParser.MatchName(targetName, _mob);
 		if (m == null || m == Mob.None) {
@@ -316,6 +342,7 @@ public class MobProxy : DynamicObjectBase, IProxy {
 	/// Matches a (possibly user-typed) name relative to the object in question.
 	/// </summary>
 	[Passthrough]
+	[CoralPassthrough]
 	public MobProxy matchName(string name) {
 		Mob m = InputParser.MatchName(name, _mob);
 		if (m == null || m == Mob.None)
@@ -331,6 +358,7 @@ public class MobProxy : DynamicObjectBase, IProxy {
 	/// against the None object.
 	/// </summary>
 	[Passthrough]
+	[CoralPassthrough]
 	public bool IsTrue() {
 		return _mob.id != Mob.None.id;
 	}
@@ -339,6 +367,7 @@ public class MobProxy : DynamicObjectBase, IProxy {
 	/// Returns a human-readable string representing this mob.
 	/// </summary>
 	[Passthrough]
+	[CoralPassthrough]
 	public override string ToString() {
 		string name = "";
 		if (!string.IsNullOrEmpty(_mob.name))
@@ -350,6 +379,7 @@ public class MobProxy : DynamicObjectBase, IProxy {
 	/// Play a sound effect which is stored on the specified mob and attribute.
 	/// </summary>
 	[Passthrough]
+	[CoralPassthrough]
 	public void playSound( MobProxy source, string attrName )
 	{
 		foreach( Mob m in _mob.location.contained )
@@ -443,7 +473,52 @@ public class MobProxy : DynamicObjectBase, IProxy {
 		newparam.caller = param.self;
 		newparam.args = args;
 
-		return v.invoke(newparam);
+		return v.invoke( newparam, false );
+	}
+
+
+	// IExtensible Members
+
+	public object getProperty( State state, string name )
+	{
+		return attrUnboxed( name );
+	}
+
+	public bool hasProperty( State state, string name )
+	{
+		// We do this so that arbitrary attribute names can be resolved to null.
+		return true;
+	}
+
+	public void setProperty( State state, string name, object value )
+	{
+		attrSet( name, value );
+	}
+
+	public object callMethod( State state, string name, object[] args )
+	{
+		// Make sure there's a matching verb to be found. Unlike the input
+		// parser, this pays no attention to verb signatures.
+		Verb v = _mob.findVerb(name);
+		if( v == null )
+			throw new NotImplementedException( "No verb named '" + name + "'." );
+
+		// Look for the previous verb parameters.
+		Verb.VerbParameters param = (Verb.VerbParameters)state.baggage.get( Verb.VerbParamsKey );
+
+		// Make a new one based on it. Most of this will stay the same.
+		var newparam = param.clone();
+		newparam.self = _mob;
+		newparam.caller = param.self;
+		newparam.args = args;
+
+		return v.invoke( newparam, true );
+	}
+
+	public bool hasMethod( State state, string name )
+	{
+		Verb v = _mob.findVerb(name);
+		return v != null;
 	}
 }
 
