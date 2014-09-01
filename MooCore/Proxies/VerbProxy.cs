@@ -22,6 +22,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Kayateia.Climoo.Scripting.SSharp;
+using Kayateia.Climoo.Scripting.Coral;
 
 /// <summary>
 /// MOO Proxy object for a MOO script verb. This is available to MOO scripts.
@@ -37,6 +38,7 @@ public class VerbProxy : DynamicObjectBase {
 	/// </summary>
 	/// <value>A proxy object for the mob in question.</value>
 	[Passthrough]
+	[CoralPassthrough]
 	public MobProxy source {
 		get { return new MobProxy(_verb.source, _player); }
 	}
@@ -45,6 +47,7 @@ public class VerbProxy : DynamicObjectBase {
 	/// The name of the verb.
 	/// </summary>
 	[Passthrough]
+	[CoralPassthrough]
 	public string name {
 		get { return _verb.name; }
 	}
@@ -53,6 +56,7 @@ public class VerbProxy : DynamicObjectBase {
 	/// The code for the verb.
 	/// </summary>
 	[Passthrough]
+	[CoralPassthrough]
 	public string code {
 		get { return _verb.item.code; }
 	}

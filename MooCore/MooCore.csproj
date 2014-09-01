@@ -103,6 +103,10 @@
       <Project>{BB592225-2584-4446-838C-E1990323FAE9}</Project>
       <Name>DatabaseCore</Name>
     </ProjectReference>
+    <ProjectReference Include="..\scripting\Coral\Coral.csproj">
+      <Project>{1BB2C096-6CBA-48AC-BBD1-6E490235CEC5}</Project>
+      <Name>Coral</Name>
+    </ProjectReference>
     <ProjectReference Include="..\scripting\s-sharp\SSharpScripting\SSharpScripting.csproj">
       <Project>{0B54F58D-EB98-4B02-B007-6BD9AA2277FA}</Project>
       <Name>SSharpScripting</Name>

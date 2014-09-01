@@ -43,6 +43,23 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Coral\Assignment.cs" />
+    <Compile Include="Coral\CallFunc.cs" />
+    <Compile Include="Coral\CompilationErrors.cs" />
+    <Compile Include="Coral\Climoo.cs" />
+    <Compile Include="Coral\While.cs" />
+    <Compile Include="Coral\Escapes.cs" />
+    <Compile Include="Coral\OnlyDefs.cs" />
+    <Compile Include="Coral\Exceptions.cs" />
+    <Compile Include="Coral\Passthrough.cs" />
+    <Compile Include="Coral\Metal.cs" />
+    <Compile Include="Coral\Strings.cs" />
+    <Compile Include="Coral\Functions.cs" />
+    <Compile Include="Coral\If.cs" />
+    <Compile Include="Coral\For.cs" />
+    <Compile Include="Coral\Dictionaries.cs" />
+    <Compile Include="Coral\CoralTestCommon.cs" />
+    <Compile Include="Coral\Arrays.cs" />
     <Compile Include="CoreDatabaseTest.cs" />
     <Compile Include="DatabaseMemory.cs" />
     <Compile Include="DatabaseCommon.cs" />
@@ -71,6 +88,10 @@
     <ProjectReference Include="..\..\MooCore\MooCore.csproj">
       <Project>{0AA2B12E-33C7-456C-B550-61C1AF11968B}</Project>
       <Name>MooCore</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\scripting\Coral\Coral.csproj">
+      <Project>{1BB2C096-6CBA-48AC-BBD1-6E490235CEC5}</Project>
+      <Name>Coral</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

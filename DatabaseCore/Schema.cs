@@ -228,13 +228,20 @@ public class TableInfo : ITableInfo
 
 	public Type getColumnType( string table, string dbName )
 	{
+		Type t;
+		if( _columnTypeCache.TryGetValue( table+dbName, out t ) )
+			return t;
+
 		if( !s_tables.ContainsKey( table ) )
 			throw new ArgumentException( "No such table", table );
 
-		Type t = s_tables[table];
+		t = s_tables[table];
 		string objName = TableRow.GetColumnObjName( t, dbName );
-		return TableRow.GetColumnType( t, objName );
+		t = TableRow.GetColumnType( t, objName );
+		_columnTypeCache[table+dbName] = t;
+		return t;
 	}
+	Dictionary<string, Type> _columnTypeCache = new Dictionary<string,Type>();
 
 	public IEnumerable<string> getAllColumns( string table )
 	{
