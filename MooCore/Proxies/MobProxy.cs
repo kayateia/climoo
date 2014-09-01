@@ -587,9 +587,9 @@ public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 	{
 		// Make sure there's a matching verb to be found. Unlike the input
 		// parser, this pays no attention to verb signatures.
-		Verb v = _mob.findVerb(name);
-		if( v == null )
-			throw new NotImplementedException( "No verb named '" + name + "'." );
+		SourcedItem<Verb> v = _mob.findVerb(name);
+		if (v == null)
+			throw new NotImplementedException("No verb named '" + name + "'.");
 
 		// Look for the previous verb parameters.
 		Verb.VerbParameters param = (Verb.VerbParameters)state.baggage.get( Verb.VerbParamsKey );
@@ -600,12 +600,12 @@ public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 		newparam.caller = param.self;
 		newparam.args = args;
 
-		return v.invoke( newparam, true );
+		return v.item.invoke( newparam, true );
 	}
 
 	public bool hasMethod( State state, string name )
 	{
-		Verb v = _mob.findVerb(name);
+		var v = _mob.findVerb(name);
 		return v != null;
 	}
 }
