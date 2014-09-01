@@ -47,6 +47,7 @@
     <Compile Include="Coral\CallFunc.cs" />
     <Compile Include="Coral\CompilationErrors.cs" />
     <Compile Include="Coral\Climoo.cs" />
+    <Compile Include="Coral\ConstScope.cs" />
     <Compile Include="Coral\While.cs" />
     <Compile Include="Coral\Escapes.cs" />
     <Compile Include="Coral\OnlyDefs.cs" />
