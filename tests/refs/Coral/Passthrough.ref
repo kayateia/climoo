@@ -6,5 +6,5 @@ e = added
 
 func = <def func(x): <([e] += [x])>>
 f = oh cool
-g = 6
+g = [6,bob]
 object dump: 5 bob [1,2] True Kayateia.Climoo.Tests.CoralTest+PtTest new value

@@ -133,6 +133,8 @@ public partial class CoralTest
 				}
 				else /*if( which == 3 )*/
 				{
+					var constscope = new ConstScope( state.scope );
+					constscope.setConstant( "testconst", "bob" );
 					return new AsyncAction[]
 					{
 						new AsyncAction()
@@ -140,7 +142,7 @@ public partial class CoralTest
 							action = AsyncAction.Action.Code,
 							code = Compiler.Compile( "test", @"
 def innerfunc(x):
-	return x + 1
+	return [x + 1, testconst]
 " )
 						},
 						new AsyncAction()
@@ -155,6 +157,11 @@ def innerfunc(x):
 								unitName = "test",
 								funcName = "PtTest.{0}".FormatI( name )
 							}
+						},
+						new AsyncAction()
+						{
+							action = AsyncAction.Action.PushScope,
+							scope = constscope
 						}
 					};
 				}
