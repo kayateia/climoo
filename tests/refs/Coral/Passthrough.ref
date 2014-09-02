@@ -7,4 +7,7 @@ e = added
 func = <def func(x): <([e] += [x])>>
 f = oh cool
 g = [6,bob]
+h = Current context: Context 1
+i = Current context: Base Context
+j = Current context: Base Context
 object dump: 5 bob [1,2] True Kayateia.Climoo.Tests.CoralTest+PtTest new value

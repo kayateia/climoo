@@ -33,6 +33,19 @@ using Kayateia.Climoo.Scripting.Coral;
 [TestFixture]
 public partial class CoralTest
 {
+	class TestSC : ISecurityContext
+	{
+		public TestSC( string name )
+		{
+			this.name = name;
+		}
+
+		public string  name
+		{
+			get; private set;
+		}
+	}
+
 	class PtTest : IExtensible
 	{
 		[CoralPassthrough]
@@ -91,6 +104,11 @@ public partial class CoralTest
 		{
 			if( name == "test2" )
 				return "test worked " + String.Join( ",", args.Select( x => x.ToStringI() ).ToArray() );
+			else if( name == "dumpcontext" )
+			{
+				var cxt = state.securityContext;
+				return "Current context: " + ( cxt == null ? "none" : cxt.name );
+			}
 			else if( name == "complex" )
 			{
 				int which = (int)args[0];
@@ -131,7 +149,7 @@ public partial class CoralTest
 						}
 					};
 				}
-				else /*if( which == 3 )*/
+				else if( which == 3 )
 				{
 					var constscope = new ConstScope( state.scope );
 					constscope.setConstant( "testconst", "bob" );
@@ -165,6 +183,53 @@ def innerfunc(x):
 						}
 					};
 				}
+				else if( which == 4 )
+				{
+					return new AsyncAction[]
+					{
+						new AsyncAction()
+						{
+							action = AsyncAction.Action.Code,
+							code = Compiler.Compile( "test", @"
+def innerfunc(pt):
+	return pt.dumpcontext()
+" )
+						},
+						new AsyncAction()
+						{
+							action = AsyncAction.Action.Call,
+							name = "innerfunc",
+							args = new object[] { this },
+							frame = new StackTrace.StackFrame()
+						},
+						new AsyncAction()
+						{
+							action = AsyncAction.Action.PushSecurityContext,
+							securityContext = new TestSC( "Context 1" )
+						}
+					};
+				}
+				else /* if( which == 5 ) */
+				{
+					return new AsyncAction[]
+					{
+						new AsyncAction()
+						{
+							action = AsyncAction.Action.Code,
+							code = Compiler.Compile( "test", @"
+def innerfunc(pt):
+	return pt.dumpcontext()
+" )
+						},
+						new AsyncAction()
+						{
+							action = AsyncAction.Action.Call,
+							name = "innerfunc",
+							args = new object[] { this },
+							frame = new StackTrace.StackFrame()
+						}
+					};
+				}
 			}
 			else
 				return null;
@@ -172,7 +237,7 @@ def innerfunc(x):
 
 		public bool hasMethod( State state, string name )
 		{
-			return name == "test2" || name == "complex";
+			return name == "test2" || name == "complex" || name == "dumpcontext";
 		}
 	}
 
@@ -200,9 +265,12 @@ def func(x):
 pt.complex(1, func)
 f = pt.complex(2)
 g = pt.complex(3)
-
+h = pt.complex(4)
+i = pt.complex(5)
+j = pt.dumpcontext()
 ";
 		Runner r = new Runner();
+		r.pushSecurityContext( new TestSC( "Base Context" ) );
 		pter.registerConst( r.state.constScope, "pt" );
 		runAndDump( "Passthrough", r, program,
 			() => "object dump: {0} {1} {2} {3} {4} {5}\r\n".FormatI(
