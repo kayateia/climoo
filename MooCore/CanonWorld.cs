@@ -25,36 +25,12 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 
-using ScriptHost = Scripting.SSharp.SSharpScripting;
-
 /// <summary>
 /// Implements the guts of the Vorlon^Wcanonical World that actually tracks all the info.
 /// amassed in various ShadowWorlds.
 /// </summary>
 public class CanonWorld : IDisposable, IWorld
 {
-	// Only do the script init once.
-	static CanonWorld()
-	{
-		ScriptHost.Init();
-
-		// These are all the types we allow the scripts direct access to, including objects passed down from the outside.
-		// TODO: This needs to be in a config file somewhere.
-		ScriptHost.AllowType( typeof( System.Object ), "object" );
-		ScriptHost.AllowType( typeof( System.String ) );
-		ScriptHost.AllowType( typeof( System.Text.StringBuilder ) );
-		ScriptHost.AllowType( typeof( System.Math ) );
-		ScriptHost.AllowType( typeof( System.Guid ) );
-		ScriptHost.AllowType( typeof( System.DateTimeOffset ), "DateTime" );
-		ScriptHost.AllowType( typeof( System.TimeSpan ) );
-		ScriptHost.AllowType( typeof( System.Random ) );
-		ScriptHost.AllowType( typeof( System.Uri ) );
-		ScriptHost.AllowType( typeof( System.UriBuilder ) );
-		ScriptHost.AllowType( typeof( System.UriComponents ) );
-		ScriptHost.AllowType( typeof( System.UriFormat ) );
-		ScriptHost.AllowType( typeof( Builtins.Strings ) );
-	}
-
 	/// <summary>
 	/// Loads a World from a database.
 	/// </summary>

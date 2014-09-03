@@ -22,7 +22,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Kayateia.Climoo.MooCore.Exceptions;
-using Kayateia.Climoo.Scripting.SSharp;
 using Kayateia.Climoo.Scripting.Coral;
 
 /// <summary>
@@ -32,7 +31,7 @@ using Kayateia.Climoo.Scripting.Coral;
 /// Everything in here that we provide access to, random scripts also
 /// have access to. So this needs to provide security as well.
 /// </remarks>
-public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
+public class MobProxy : IProxy, IExtensible {
 	internal MobProxy(Mob mob, Player player) {
 		_mob = mob;
 		_player = player;
@@ -57,14 +56,12 @@ public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 	/// <summary>
 	/// The mob's world ID.
 	/// </summary>
-	[Passthrough]
 	[CoralPassthrough]
 	public int id { get { return _mob.id; } }
 
 	/// <summary>
 	/// The mob's parent's world ID. This is the mob's OOP inheritance base.
 	/// </summary>
-	[Passthrough]
 	[CoralPassthrough]
 	public int parentId {
 		get
@@ -80,7 +77,6 @@ public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 	/// <summary>
 	/// The mob's parent mob. This is the mob's OOP inheritance base.
 	/// </summary>
-	[Passthrough]
 	[CoralPassthrough]
 	public MobProxy parent {
 		get {
@@ -98,7 +94,6 @@ public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 	/// <summary>
 	/// The mob's location's world ID.
 	/// </summary>
-	[Passthrough]
 	[CoralPassthrough]
 	public int locationId {
 		get { return _mob.locationId; }
@@ -108,7 +103,6 @@ public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 	/// <summary>
 	/// The mob's location mob.
 	/// </summary>
-	[Passthrough]
 	[CoralPassthrough]
 	public MobProxy location {
 		get {
@@ -122,7 +116,6 @@ public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 	/// <summary>
 	/// The mob's description.
 	/// </summary>
-	[Passthrough]
 	[CoralPassthrough]
 	public string desc {
 		get
@@ -140,21 +133,18 @@ public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 	/// <summary>
 	/// Returns true if the mob represents a sentient object, e.g. a player.
 	/// </summary>
-	[Passthrough]
 	[CoralPassthrough]
 	public bool sentient { get { return _mob.isDescendentOf(_mob.world.findObject("/templates/player").id); } }
 
 	/// <summary>
 	/// Returns the mob's fully qualified path name.
 	/// </summary>
-	[Passthrough]
 	[CoralPassthrough]
 	public string fqpn { get { return _mob.fqpn; } }
 
 	/// <summary>
 	/// The mob's owner's mob. This is for permission purposes.
 	/// </summary>
-	[Passthrough]
 	[CoralPassthrough]
 	public MobProxy owner {
 		get {
@@ -172,7 +162,6 @@ public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 	/// <summary>
 	/// If this mob represents a player, this returns a Player object for it. Otherwise, returns null.
 	/// </summary>
-	[Passthrough]
 	[CoralPassthrough]
 	public PlayerProxy player {
 		get {
@@ -186,7 +175,6 @@ public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 	/// <summary>
 	/// Returns an array of all mobs contained within this mob.
 	/// </summary>
-	[Passthrough]
 	[CoralPassthrough]
 	public MobProxy[] contained {
 		get
@@ -199,7 +187,6 @@ public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 	/// <summary>
 	/// Returns all of the attributes of this mob.
 	/// </summary>
-	[Passthrough]
 	[CoralPassthrough]
 	public AttrProxy[] attributes {
 		get
@@ -213,7 +200,6 @@ public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 	/// <summary>
 	/// Returns all of the verbs of this mob.
 	/// </summary>
-	[Passthrough]
 	[CoralPassthrough]
 	public VerbProxy[] verbs {
 		get
@@ -227,7 +213,6 @@ public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 	/// <summary>
 	/// Returns true if the mob has the specified verb.
 	/// </summary>
-	[Passthrough]
 	[CoralPassthrough]
 	public bool hasVerb(string verb)
 	{
@@ -238,7 +223,6 @@ public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 	/// <summary>
 	/// Deletes the specified verb from the mob.
 	/// </summary>
-	[Passthrough]
 	[CoralPassthrough]
 	public void verbDel(string verb)
 	{
@@ -249,7 +233,6 @@ public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 	/// <summary>
 	/// Gets the specified verb's program code if it exists on the mob.
 	/// </summary>
-	[Passthrough]
 	[CoralPassthrough]
 	public string verbGet(string verb)
 	{
@@ -261,7 +244,6 @@ public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 	/// <summary>
 	/// Sets the specified verb's program code on the mob.
 	/// </summary>
-	[Passthrough]
 	[CoralPassthrough]
 	public void verbSet(string verb, string code)
 	{
@@ -276,7 +258,6 @@ public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 	/// <summary>
 	/// Gets the specified attribute on the mob, if it exists.
 	/// </summary>
-	[Passthrough]
 	[CoralPassthrough]
 	public AttrProxy attrGet( string id )
 	{
@@ -293,7 +274,6 @@ public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 	/// an attribute proxy, and simply returns the value. This will generate an image URL
 	/// if the attribute is an image.
 	/// </summary>
-	[Passthrough]
 	[CoralPassthrough]
 	public object attrUnboxed( string id )
 	{
@@ -316,7 +296,6 @@ public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 	/// <summary>
 	/// Sets the attribute value.
 	/// </summary>
-	[Passthrough]
 	[CoralPassthrough]
 	public void attrSet( string id, object val )
 	{
@@ -328,7 +307,6 @@ public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 	/// <summary>
 	/// Deletes the specified attribute, if it exists.
 	/// </summary>
-	[Passthrough]
 	[CoralPassthrough]
 	public void attrDel( string id )
 	{
@@ -337,7 +315,6 @@ public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 	}
 
 	// Because of the way the S# runtime works, this allows us to override ==.
-	[Passthrough]
 	[CoralPassthrough]
 	public override bool Equals(object obj) {
 		// Only special case mobs here. If it's something more complicated, equality can fail.
@@ -406,7 +383,6 @@ public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 	/// <summary>
 	/// Matches a (possibly user-typed) name relative to the object in question.
 	/// </summary>
-	[Passthrough]
 	[CoralPassthrough]
 	public MobProxy matchName(string name) {
 		Mob m = InputParser.MatchName(name, _mob);
@@ -422,7 +398,6 @@ public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 	/// This allows us to do a scripted type coercion, which we'll use to compare
 	/// against the None object.
 	/// </summary>
-	[Passthrough]
 	[CoralPassthrough]
 	public bool IsTrue() {
 		return _mob.id != Mob.None.id;
@@ -431,7 +406,6 @@ public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 	/// <summary>
 	/// Returns a human-readable string representing this mob.
 	/// </summary>
-	[Passthrough]
 	[CoralPassthrough]
 	public override string ToString() {
 		string name = "";
@@ -443,7 +417,6 @@ public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 	/// <summary>
 	/// Play a sound effect which is stored on the specified mob and attribute.
 	/// </summary>
-	[Passthrough]
 	[CoralPassthrough]
 	public void playSound( MobProxy source, string attrName )
 	{
@@ -458,7 +431,6 @@ public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 	/// <summary>
 	/// True if this object represents a player that's not logged in.
 	/// </summary>
-	[Passthrough]
 	[CoralPassthrough]
 	public bool sleeping
 	{
@@ -503,72 +475,6 @@ public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 	}
 
 	////////////////////////////////////////////////////////////////////////////////
-	// These methods implement the dynamic scripting interface, which allows us
-	// to interpret and approve arbitrary calls to the object from script fragments.
-	// This allows us to do things like call verbs on objects as methods, and
-	// retrieve attributes like members.
-
-	public override object getMember(string name) { return attrUnboxed(name); }
-	public override string getMimeType(string name) {
-		Perm.AttrRead( _player.actorContext, name ).checkOrThrow( _mob, "Get MIME type on {0} on #{1}".FormatI( name, _mob.id ) );
-		SourcedItem<TypedAttribute> ta = _mob.findAttribute(name);
-		if (ta == null)
-			return null;
-		else
-			return ta.item.mimetype;
-	}
-	public override bool hasMember(string name) {
-		// We do this so that arbitrary attribute names can be resolved to null.
-		return true;
-	}
-	public override IEnumerable<string> getMemberNames()
-	{
-		Perm.ObjRead( _player.actorContext ).checkOrThrow( _mob, "Read verb list on #{0}".FormatI( _mob.id ) );
-		return _mob.attrList.Select( m => (string)m );
-	}
-	public override void setMember(string name, object val)
-	{
-		Perm.AttrWrite( _player.actorContext, name ).checkOrThrow( _mob, "Write attribute {0} on #{1}".FormatI( name, _mob.id ) );
-		attrSet(name, val);
-	}
-
-	public override void setMimeType(string name, string type) {
-		Perm.AttrWrite( _player.actorContext, name ).checkOrThrow( _mob, "Write MIME type on {0} on #{1}".FormatI( name, _mob.id ) );
-
-		if (!_mob.attrHas(name))
-			throw new ArgumentException("Unknown attribute {0}.".FormatI(name));
-		var attr = _mob.attrGet(name);
-		attr.mimetype = type;
-	}
-
-	// This has to succeed without permission checks, unfortunately, or executing verbs on opaque
-	// objects can't work at all.
-	public override bool hasMethod(string name) {
-		var v = _mob.findVerb(name);
-		return v != null;
-	}
-
-	public override object callMethod(Scope scope, string name, object[] args) {
-		// Make sure there's a matching verb to be found. Unlike the input
-		// parser, this pays no attention to verb signatures.
-		SourcedItem<Verb> v = _mob.findVerb(name);
-		if (v == null)
-			throw new NotImplementedException("No verb named '" + name + "'.");
-
-		// Look for the previous verb parameters.
-		Verb.VerbParameters param = (Verb.VerbParameters)scope.baggageGet(Verb.VerbParamsKey);
-
-		// Make a new one based on it. Most of this will stay the same.
-		var newparam = param.clone();
-		newparam.self = _mob;
-		newparam.caller = param.self;
-		newparam.args = args;
-
-		// TODO: Remove S# support
-		return v.item.invoke(newparam);
-	}
-
-	
 	// IExtensible Members
 
 	public object getProperty( State state, string name )

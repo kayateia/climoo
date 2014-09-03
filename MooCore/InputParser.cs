@@ -207,7 +207,7 @@ public class InputParser {
 		Verb v = new Verb() {
 			name = "inline",
 			help = "",
-			code = input.Substring(1) + ';'
+			code = "def verb():\n\t" + input.Substring(1)
 		};
 
 		var param = new Verb.VerbParameters() {

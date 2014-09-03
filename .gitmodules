@@ -1,6 +1,3 @@
-[submodule "ScriptDotNet"]
-	path = ScriptDotNet
-	url = git://github.com/kayateia/scriptdotnet.git
 [submodule "tests/nunit"]
 	path = tests/nunit
 	url = https://github.com/kayateia/nunit.git

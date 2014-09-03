@@ -21,7 +21,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using SSharp = Kayateia.Climoo.Scripting.SSharp;
 using Coral = Kayateia.Climoo.Scripting.Coral;
 
 /// <summary>
@@ -223,31 +222,13 @@ public class Verb {
 			}
 			_code = code;
 
-			// Is it S# or Coral code?
-			if( isCoral( code ) )
-			{
-				// Probably Coral code.
-				_coral = Coral.Compiler.Compile( this.name, code );
-				_coral.errorIfNotOnlyDefs();
-			}
-			else
-			{
-				// Probably S# code.
-				if (_script == null)
-					_script = new SSharp.ScriptFragment(code);
-				else
-					_script.code = code;
-			}
+			_coral = Coral.Compiler.Compile( this.name, code );
+			_coral.errorIfNotOnlyDefs();
 
 			// Are there method signatures at the top in comment form?
 			if( isVerbLine( code ) )
 				parseForSignatures();
 		}
-	}
-
-	bool isCoral( string code )
-	{
-		return code.IndexOf( "def " ) >= 0;
 	}
 
 	bool isVerbLine( string code )
@@ -466,89 +447,67 @@ public class Verb {
 			return null;
 		};
 
-		if( _script != null )
+		// Is the verb valid / compiled properly?
+		if( !_coral.success )
 		{
-			var ssscope = new SSharp.Scope();
-			ssscope.queryForItem = s => querier(s);
-			foreach( var kv in scope )
-				ssscope.set( kv.Key, kv.Value );
+			player.write( "Verb was not properly compiled." );
+			if( _coral.errors != null )
+			{
+				foreach( var err in _coral.errors )
+					player.write( " line {0}, col {1}: {2}".FormatI( err.line, err.col, err.message ) );
+			}
+			return null;
+		}
 
-			// Pass these on literally to any down-stream invokes.
-			ssscope.baggageSet(VerbParamsKey, param);
+		// We have to run the code first, for it to define its verb.
+		var runner = new Coral.Runner();
+		var tempScope = new Coral.StandardScope( runner.state.baseScope );
+		runner.pushScope( tempScope );
+		runner.setScopeCallback( querier );
+		foreach( var kv in scope )
+			runner.addToScope( kv.Key, kv.Value );
+		runner.runSync( _coral );
+		Coral.FValue verbFunc = (Coral.FValue)tempScope.get( "verb" );
+		tempScope.delete( "verb" );
 
-			object rv = _script.execute(ssscope);
-			param.player.coralState.clearActions();
-			return rv;
+		// Now that's done, hook up to the main state.
+		runner = new Coral.Runner( param.player.coralState );
+		runner.pushScope( tempScope );
+
+		// Pass these on literally to any down-stream invokes.
+		runner.state.baggage.set( VerbParamsKey, param );
+
+		Coral.StackTrace.StackFrame frame = new Coral.StackTrace.StackFrame()
+		{
+			unitName = "<climoo>",
+			funcName = "<trampoline>"
+		};
+
+		// If we came from Coral and we're going to Coral, use a continuation.
+		if( coralContinuation )
+		{
+			// If there wasn't one, throw a sensible error.
+			if( verbFunc == null )
+				throw new InvalidOperationException( "Verb does not define a function called 'verb'." );
+
+			return new Coral.AsyncAction()
+			{
+				action = Coral.AsyncAction.Action.Call,
+				function = verbFunc,
+				args = param.args,
+				frame = frame
+			};
 		}
 		else
 		{
-			// Is the verb valid / compiled properly?
-			if( !_coral.success )
-			{
-				player.write( "Verb was not properly compiled." );
-				if( _coral.errors != null )
-				{
-					foreach( var err in _coral.errors )
-						player.write( " line {0}, col {1}: {2}".FormatI( err.line, err.col, err.message ) );
-				}
-				return null;
-			}
-
-			// We have to run the code first, for it to define its verb.
-			var runner = new Coral.Runner();
-			var tempScope = new Coral.StandardScope( runner.state.constScope );
-			runner.pushScope( tempScope );
-			runner.setScopeCallback( querier );
-			foreach( var kv in scope )
-				runner.addToScope( kv.Key, kv.Value );
-			runner.runSync( _coral );
-			Coral.FValue verbFunc = (Coral.FValue)tempScope.get( "verb" );
-			tempScope.delete( "verb" );
-
-			// Now that's done, hook up to the main state.
-			runner = new Coral.Runner( param.player.coralState );
-			runner.pushScope( tempScope );
-
-			// Pass these on literally to any down-stream invokes.
-			runner.state.baggage.set( VerbParamsKey, param );
-
-			Coral.StackTrace.StackFrame frame = new Coral.StackTrace.StackFrame()
-			{
-				unitName = "<climoo>",
-				funcName = "<trampoline>"
-			};
-
-			// If we came from Coral and we're going to Coral, use a continuation.
-			if( coralContinuation )
-			{
-				// If there wasn't one, throw a sensible error.
-				if( verbFunc == null )
-					throw new InvalidOperationException( "Verb does not define a function called 'verb'." );
-
-				return new Coral.AsyncAction()
-				{
-					action = Coral.AsyncAction.Action.Call,
-					function = verbFunc,
-					args = param.args,
-					frame = frame
-				};
-			}
-			else
-			{
-				runner.state.scope.set( "!verb-" + this.name, verbFunc );
-				return runner.callFunction( "!verb-" + this.name, param.args, typeof( object ), frame );
-			}
+			runner.state.scope.set( "!verb-" + this.name, verbFunc );
+			return runner.callFunction( "!verb-" + this.name, param.args, typeof( object ), frame );
 		}
 	}
 
-	// If this is S# based...
-	SSharp.ScriptFragment _script;
-
-	// If this is Coral based...
-	Coral.CodeFragment _coral;
-
-	// In both cases...
+	// The Coral code and compiled fragment.
 	string _code;
+	Coral.CodeFragment _coral;
 
 	//////////////////////////////////////////////////////////////
 	class PrepWrap {
