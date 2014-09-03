@@ -352,11 +352,25 @@ public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 	}
 
 	/// <summary>
+	/// Relocates this mob to another location mob, by proxy, ID, or path.
+	/// </summary>
+	[CoralPassthrough]
+	public void moveTo( object target )
+	{
+		if( target is MobProxy )
+			moveToInternal( (MobProxy)target );
+		else if( target is int )
+			moveToInternal( (int)target );
+		else if( target is string )
+			moveToInternal( (string)target );
+		else
+			throw new ArgumentException( "Can't moveTo() that object" );
+	}
+
+	/// <summary>
 	/// Relocates this mob to another location mob.
 	/// </summary>
-	[Passthrough]
-	[CoralPassthrough]
-	public void moveTo( MobProxy target )
+	void moveToInternal( MobProxy target )
 	{
 		Perm.ObjMove( _player.actorContext ).checkOrThrow( _mob, "Move #{1} to {0}".FormatI( target._mob.id, _mob.id ) );
 		_mob.locationId = target._mob.id;
@@ -365,9 +379,7 @@ public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 	/// <summary>
 	/// Relocates this mob to another location mob, by id.
 	/// </summary>
-	[Passthrough]
-	[CoralPassthrough]
-	public void moveTo( int targetId )
+	void moveToInternal( int targetId )
 	{
 		Perm.ObjMove( _player.actorContext ).checkOrThrow( _mob, "Move #{1} to {0}".FormatI( targetId, _mob.id ) );
 		_mob.locationId = targetId;
@@ -376,9 +388,7 @@ public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 	/// <summary>
 	/// Relocates this mob to another location mob, by path.
 	/// </summary>
-	[Passthrough]
-	[CoralPassthrough]
-	public MobProxy moveTo( string targetName )
+	MobProxy moveToInternal( string targetName )
 	{
 		Perm.ObjMove( _player.actorContext ).checkOrThrow( _mob, "Move #{1} to {0}".FormatI( targetName, _mob.id ) );
 
