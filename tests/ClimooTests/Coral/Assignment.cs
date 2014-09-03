@@ -49,6 +49,7 @@ g = e.foogle
 h = e[""boogle""]
 i = null
 j = !null
+k = b % 4
 ";
 		runAndDump( "Assignment", program );
 	}
