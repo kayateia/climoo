@@ -476,7 +476,9 @@ public class Verb {
 			// Pass these on literally to any down-stream invokes.
 			ssscope.baggageSet(VerbParamsKey, param);
 
-			return _script.execute(ssscope);
+			object rv = _script.execute(ssscope);
+			param.player.coralState.clearActions();
+			return rv;
 		}
 		else
 		{
@@ -494,15 +496,21 @@ public class Verb {
 
 			// We have to run the code first, for it to define its verb.
 			var runner = new Coral.Runner();
+			var tempScope = new Coral.StandardScope( runner.state.constScope );
+			runner.pushScope( tempScope );
 			runner.setScopeCallback( querier );
 			foreach( var kv in scope )
 				runner.addToScope( kv.Key, kv.Value );
+			runner.runSync( _coral );
+			Coral.FValue verbFunc = (Coral.FValue)tempScope.get( "verb" );
+			tempScope.delete( "verb" );
+
+			// Now that's done, hook up to the main state.
+			runner = new Coral.Runner( param.player.coralState );
+			runner.pushScope( tempScope );
 
 			// Pass these on literally to any down-stream invokes.
 			runner.state.baggage.set( VerbParamsKey, param );
-
-			// This ought to produce a function called 'verb' in the scope. We'll call that.
-			runner.runSync( _coral );
 
 			Coral.StackTrace.StackFrame frame = new Coral.StackTrace.StackFrame()
 			{
@@ -513,23 +521,23 @@ public class Verb {
 			// If we came from Coral and we're going to Coral, use a continuation.
 			if( coralContinuation )
 			{
-				// Pull the FValue of the function we just loaded.
-				Coral.FValue fv = (Coral.FValue)runner.state.scope.get( "verb" );
-
 				// If there wasn't one, throw a sensible error.
-				if( fv == null )
-					throw new InvalidOperationException( "'verb' was not defined in the verb code container" );
+				if( verbFunc == null )
+					throw new InvalidOperationException( "Verb does not define a function called 'verb'." );
 
 				return new Coral.AsyncAction()
 				{
 					action = Coral.AsyncAction.Action.Call,
-					function = fv,
+					function = verbFunc,
 					args = param.args,
 					frame = frame
 				};
 			}
 			else
-				return runner.callFunction( "verb", param.args, typeof( object ), frame );
+			{
+				runner.state.scope.set( "!verb-" + this.name, verbFunc );
+				return runner.callFunction( "!verb-" + this.name, param.args, typeof( object ), frame );
+			}
 		}
 	}
 

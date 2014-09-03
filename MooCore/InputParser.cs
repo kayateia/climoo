@@ -86,8 +86,8 @@ public class InputParser {
 			{
 				// This verb doesn't get any special permissions. It's just processing input from the user.
 				object results;
-				using( var ac = new ActorContext( player, player.id ) )
-					results = rootProcess.invoke(param);
+				player.actorContextPush( "_processInput", player.id );
+				results = rootProcess.invoke( param );
 				if (results == null || (results is bool && (bool)results == false)) {
 					// Proceed jolly onwards...
 				} else {
@@ -114,8 +114,8 @@ public class InputParser {
 			var v = selectedVerb.First();
 
 			param.self = v.foundOn;
-			using( var ac = new ActorContext( player, v.definedOn.ownerId ) )
-				v.verb.invoke(param);
+			player.actorContextPush( v.verb.name, v.definedOn.ownerId );
+			v.verb.invoke( param );
 
 			return "";
 		}
@@ -178,8 +178,8 @@ public class InputParser {
 			SourcedItem<Verb> huh = playerMob.location.findVerb("_huh");
 			if (huh != null) {
 				param.self = playerMob.location;
-				using( var ac = new ActorContext( player, huh.source.id ) )
-					huh.item.invoke(param);
+				player.actorContextPush( "_huh", huh.source.id );
+				huh.item.invoke( param );
 				return "";
 			}
 
@@ -190,8 +190,8 @@ public class InputParser {
 		// Execute the verb.
 		var v2 = selectedVerb.First();
 		param.self = v2.foundOn;
-		using( var ac = new ActorContext( player, v2.definedOn.ownerId ) )
-			v2.verb.invoke(param);
+		player.actorContextPush( v2.verb.name, v2.definedOn.ownerId );
+		v2.verb.invoke( param );
 
 		// Any output will come from the script.
 		return "";
@@ -221,8 +221,8 @@ public class InputParser {
 		};
 
 		object rv;
-		using( var ac = new ActorContext( player, player.id ) )
-			rv = v.invoke( param );
+		player.actorContextPush( "<immediate>", player.id );
+		rv = v.invoke( param );
 
 		// Try to do some reallly basic type massaging to make it viewable on the terminal.
 		string rvs;

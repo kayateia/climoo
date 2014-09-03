@@ -554,14 +554,8 @@ public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 		newparam.caller = param.self;
 		newparam.args = args;
 
-		// TODO: Apply to IExtensible members below too
-		if( Perm.IsVerbAntistick( _mob, name ) )
-			return v.item.invoke(newparam);
-		else
-		{
-			using( var ac = new ActorContext( _player, v.source.id ) )
-				return v.item.invoke(newparam);
-		}
+		// TODO: Remove S# support
+		return v.item.invoke(newparam);
 	}
 
 	
@@ -600,6 +594,7 @@ public class MobProxy : DynamicObjectBase, IProxy, IExtensible {
 		newparam.caller = param.self;
 		newparam.args = args;
 
+		_player.actorContextPush( v.name, v.source.id );
 		return v.item.invoke( newparam, true );
 	}
 
