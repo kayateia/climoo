@@ -3,7 +3,6 @@ compiled successfully
 Test 2:
 line 3 col 10: Syntax error, unexpected input.
 line 4 col 9: Unexpected indentation.
-line 5 col 1: Syntax error, expected: operator, Identifier, number, $, !, string, #, [, def, {, return, break, continue, if, try, throw, for, while
+line 5 col 1: Syntax error, expected: operator, Identifier, number, $, #, [, !, {, string, return, break, continue, throw, def, if, try, for, while
 Test 3:
-line 5 col 30: Syntax error, expected: operator, ., [, ,, ]
-line 6 col 1: Syntax error, expected: operator, ., [, ,, ]
+line 5 col 30: Syntax error, expected: operator, [, ,, ]

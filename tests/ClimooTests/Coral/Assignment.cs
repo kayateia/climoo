@@ -50,6 +50,7 @@ h = e[""boogle""]
 i = null
 j = !null
 k = b % 4
+l = !i || e.bar
 ";
 		runAndDump( "Assignment", program );
 	}
