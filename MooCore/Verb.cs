@@ -224,6 +224,11 @@ public class Verb {
 
 			_coral = Coral.Compiler.Compile( this.name, code );
 			_coral.errorIfNotOnlyDefs();
+			if( !_coral.containsAnyCode )
+			{
+				// It's simplest to just build a fake empty verb.
+				_coral = Coral.Compiler.Compile( this.name, "def verb():\r\n\tpass\r\n" );
+			}
 
 			// Are there method signatures at the top in comment form?
 			if( isVerbLine( code ) )
@@ -483,13 +488,13 @@ public class Verb {
 			funcName = "<trampoline>"
 		};
 
+		// If there wasn't one, throw a sensible error.
+		if( verbFunc == null )
+			throw new InvalidOperationException( "Verb does not define a function called 'verb'." );
+
 		// If we came from Coral and we're going to Coral, use a continuation.
 		if( coralContinuation )
 		{
-			// If there wasn't one, throw a sensible error.
-			if( verbFunc == null )
-				throw new InvalidOperationException( "Verb does not define a function called 'verb'." );
-
 			return new Coral.AsyncAction()
 			{
 				action = Coral.AsyncAction.Action.Call,
