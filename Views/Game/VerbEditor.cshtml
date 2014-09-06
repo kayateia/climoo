@@ -51,13 +51,13 @@
 
 <script src="/Scripts/ace/ace.js" type="text/javascript" charset="utf-8"></script>
 <script src="/Scripts/ace/keybinding-emacs.js" type="text/javascript" charset="utf-8"></script>
-<script src="/Scripts/ace/mode-csharp.js" type="text/javascript" charset="utf-8"></script>
+<script src="/Scripts/ace/mode-coral.js" type="text/javascript" charset="utf-8"></script>
 <script src="/Scripts/ace/theme-tomorrow_night_purple.js" type="text/javascript" charset="utf-8"></script>
 <script>
 	var texteditor = ace.edit("text");
-	var csharpMode = require("ace/mode/csharp").Mode;
+	var coralMode = require("ace/mode/coral").Mode;
 	texteditor.setTheme("ace/theme/tomorrow_night_purple");
-	texteditor.getSession().setMode(new csharpMode());
+	texteditor.getSession().setMode(new coralMode());
 	texteditor.getSession().setTabSize(4);
 	texteditor.getSession().setUseSoftTabs(false);
 	texteditor.setBehavioursEnabled(false);
