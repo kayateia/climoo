@@ -89,12 +89,6 @@ public class Player {
 	/// </summary>
 	public void write(string text) {
 		if (this.NewOutput != null) {
-			string stack = String.Join( "->",
-				_coralState.getSecurityContextStack()
-					.Select( cxt => "{0}".FormatI( ((SecurityContext)cxt).actorId ) )
-					.ToArray()
-			);
-			text = "[color=#0cc]Running as {0} ({1})[/color] {2}".FormatI( this.actorContext, stack, text );
 			string moocoded = MooCode.PrepareForClient(text);
 			this.NewOutput(moocoded);
 		}
@@ -146,6 +140,20 @@ public class Player {
 		{
 			SecurityContext cxt = (SecurityContext)_coralState.securityContext;
 			return cxt.actorId;
+		}
+	}
+
+	/// <summary>
+	/// Returns the current actor context stack. The entry nearest the top is the current one.
+	/// This is just a debug tool.
+	/// </summary>
+	public int[] actorContextStack
+	{
+		get
+		{
+			return _coralState.getSecurityContextStack()
+				.Select( cxt => ((SecurityContext)cxt).actorId )
+				.ToArray();
 		}
 	}
 

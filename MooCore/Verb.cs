@@ -492,6 +492,13 @@ public class Verb {
 		if( verbFunc == null )
 			throw new InvalidOperationException( "Verb does not define a function called 'verb'." );
 
+		string securityStack = String.Join( "->",
+			param.player.actorContextStack.Select( id => "{0}".FormatI( id ) )
+				.ToArray()
+		);
+		string securityText = "[color=#0cc]Running {0} as {1} ({2})[/color] {2}".FormatI( this.name, param.player.actorContext, securityStack );
+		param.player.write( securityText );
+
 		// If we came from Coral and we're going to Coral, use a continuation.
 		if( coralContinuation )
 		{
