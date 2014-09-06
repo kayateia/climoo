@@ -492,12 +492,20 @@ public class Verb {
 		if( verbFunc == null )
 			throw new InvalidOperationException( "Verb does not define a function called 'verb'." );
 
-		string securityStack = String.Join( "->",
-			param.player.actorContextStack.Select( id => "{0}".FormatI( id ) )
-				.ToArray()
-		);
-		string securityText = "[color=#0cc]Running {0} as {1} ({2})[/color] {2}".FormatI( this.name, param.player.actorContext, securityStack );
-		param.player.write( securityText );
+		// Print security context debug info if the player's debug flag is set.
+		if( player.get.attrHas( "debug" ) )
+		{
+			var value = player.get.attrGet( "debug" ).contents;
+			if( value is bool && (bool)value )
+			{
+				string securityStack = String.Join( "->",
+					param.player.actorContextStack.Select( id => "{0}".FormatI( id ) )
+						.ToArray()
+				);
+				string securityText = "[color=#0cc]Running {0} as {1} ({2})[/color]".FormatI( this.name, param.player.actorContext, securityStack );
+				param.player.writeError( securityText );
+			}
+		}
 
 		// If we came from Coral and we're going to Coral, use a continuation.
 		if( coralContinuation )

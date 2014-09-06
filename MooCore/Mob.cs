@@ -102,6 +102,7 @@ public class Mob
 		public const string PulseError = "pulseerror";		// Should be a string or nothing
 		public const string Opaque = "opaque";		// Just needs to exist
 		public const string TeamMember = "teammember";		// Team member, aka admin
+		public const string Debug = "debug";		// Turns on debug messages if set
 	}
 
 	/// <summary>
