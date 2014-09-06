@@ -84,6 +84,10 @@ class Program
 		{
 			Console.WriteLine( "Would play sound: {0}", o );
 		};
+		player.NewErrorOutput = (o) =>
+		{
+			Console.WriteLine( "[error] {0}", o );
+		};
 		player.world = World.Wrap( shadowWorld );
 		if( playerMob != null )
 			playerMob.player = player;

@@ -29,6 +29,7 @@ using Coral = Kayateia.Climoo.Scripting.Coral;
 public class Player {
 	public delegate void OutputNotification(string text);
 	public OutputNotification NewOutput;
+	public OutputNotification NewErrorOutput;
 	public OutputNotification NewSound;
 
 	public Player( int id ) {
@@ -94,6 +95,14 @@ public class Player {
 		}
 	}
 
+	public void writeError(string text) {
+		if( this.NewErrorOutput != null )
+		{
+			string moocoded = MooCode.PrepareForClient(text);
+			this.NewErrorOutput(moocoded);
+		}
+	}
+
 	/// <summary>
 	/// Plays a sound effect on the player's console.
 	/// </summary>
@@ -118,6 +127,7 @@ public class Player {
 	/// </summary>
 	public void detach() {
 		this.NewOutput = null;
+		this.NewErrorOutput = null;
 		this.NewSound = null;
 	}
 

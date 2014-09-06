@@ -227,7 +227,7 @@ public class Verb {
 			if( !_coral.containsAnyCode )
 			{
 				// It's simplest to just build a fake empty verb.
-				_coral = Coral.Compiler.Compile( this.name, "def verb():\r\n\tpass\r\n" );
+				_coral = Coral.Compiler.Compile( this.name, "def verb():\n\tpass\n" );
 			}
 
 			// Are there method signatures at the top in comment form?
@@ -512,8 +512,16 @@ public class Verb {
 		}
 		else
 		{
-			runner.state.scope.set( "!verb-" + this.name, verbFunc );
-			return runner.callFunction( "!verb-" + this.name, param.args, typeof( object ), frame );
+			try
+			{
+				runner.state.scope.set( "!verb-" + this.name, verbFunc );
+				return runner.callFunction( "!verb-" + this.name, param.args, typeof( object ), frame );
+			}
+			catch( Coral.CoralException ex )
+			{
+				param.player.writeError( "Unhandled exception {0}: {1}\n{2}".FormatI( ex.name, ex.Message, ex.trace ) );
+				return null;
+			}
 		}
 	}
 

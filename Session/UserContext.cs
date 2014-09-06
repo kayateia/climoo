@@ -158,6 +158,11 @@ public class UserContext : IDisposable {
 				{
 					outputPush( text );
 				};
+				_player.NewErrorOutput = (text) =>
+				{
+					string output = "<span class=\"error\">{0}</span>".FormatI( text );
+					outputPush( output );
+				};
 				_player.NewSound = (url) =>
 				{
 					outputPush( new ConsoleCommand() { sound = url } );
