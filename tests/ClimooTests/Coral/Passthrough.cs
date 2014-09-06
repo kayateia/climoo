@@ -81,23 +81,46 @@ public partial class CoralTest
 		}
 		public string _prop;
 
+		[CoralPassthrough]
+		public string throwme
+		{
+			get
+			{
+				throw new ArgumentException( "Just try reading me bub" );
+			}
+			set
+			{
+				throw new ArgumentException( "Just try writing me bub" );
+			}
+		}
+
+		[CoralPassthrough]
+		public void callnthrow()
+		{
+			throw new ArgumentException( "New call'n'throw service in the tri-state area" );
+		}
+
 		public object getProperty( State state, string name )
 		{
 			if( name == "arbitrary" )
 				return "it's arbitrary, yo";
+			else if( name == "throws" )
+				throw new ArgumentException( "Can't read this" );
 			else
 				return "something else";
 		}
 
 		public bool hasProperty( State state, string name )
 		{
-			return name == "arbitrary" || name == "other";
+			return name == "arbitrary" || name == "other" || name == "throws";
 		}
 
 		public void setProperty( State state, string name, object value )
 		{
 			if( name == "arbitrary" )
 				_f = (string)value;
+			if( name == "throws" )
+				throw new ArgumentException( "Can't write this" );
 		}
 
 		public object callMethod( State state, string name, object[] args )
@@ -209,7 +232,7 @@ def innerfunc(pt):
 						}
 					};
 				}
-				else /* if( which == 5 ) */
+				else if( which == 5 )
 				{
 					return new AsyncAction[]
 					{
@@ -230,6 +253,10 @@ def innerfunc(pt):
 						}
 					};
 				}
+				else /* if( which == 6 ) */
+				{
+					throw new ArgumentException( "No idea what you're talking about!" );
+				}
 			}
 			else
 				return null;
@@ -238,6 +265,14 @@ def innerfunc(pt):
 		public bool hasMethod( State state, string name )
 		{
 			return name == "test2" || name == "complex" || name == "dumpcontext";
+		}
+
+		public CoralException filterException( Exception ex )
+		{
+			if( ex is ArgumentException )
+				return CoralException.GetForName( "test_exception", ex.Message );
+			else
+				return CoralException.GetForAny( ex );
 		}
 	}
 
@@ -268,6 +303,31 @@ g = pt.complex(3)
 h = pt.complex(4)
 i = pt.complex(5)
 j = pt.dumpcontext()
+
+k = 0
+try:
+	pt.complex(6)
+except e:
+	k = e
+
+l = 0
+try:
+	l = pt.throwme
+except e:
+	l = e
+
+m = 0
+try:
+	pt.throwme = ""foo""
+except e:
+	m = e
+
+n = 0
+try:
+	pt.callnthrow()
+except e:
+	n = e
+
 ";
 		Runner r = new Runner();
 		r.pushSecurityContext( new TestSC( "Base Context" ) );

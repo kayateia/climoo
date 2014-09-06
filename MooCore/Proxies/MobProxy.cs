@@ -519,6 +519,14 @@ public class MobProxy : IProxy, IExtensible {
 		var v = _mob.findVerb(name);
 		return v != null;
 	}
+
+	public CoralException filterException( Exception ex )
+	{
+		if( ex is Exceptions.PermissionFailure )
+			return CoralException.GetForName( "perm_denied", ex.Message );
+		else
+			return CoralException.GetForAny( ex );
+	}
 }
 
 }
