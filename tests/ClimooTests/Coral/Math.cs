@@ -44,6 +44,7 @@ for i in a:
 	if i < 0 || i >= 50:
 		b = false
 a = []
+c = math.sha1(""teststring"")
 ";
 		runAndDump( "Math", program );
 	}
