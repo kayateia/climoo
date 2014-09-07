@@ -70,6 +70,19 @@ public class UserContext : IDisposable {
 			outputPush( "\nSuddenly you're falling...!\n\n" );
 			return executeCommand( "look", world );
 		}
+		else if( !this.inGame )
+		{
+			// This is a sad shadow of what I'd hoped to attain with the public area,
+			// but for now I wish to continue on with other things instead of fighting
+			// the permissions system more.
+			if( text == "look" )
+				return executeCommand( text, world );
+			else if( text == "help" )
+				outputPush( "\nType login to begin.\n" );
+			else
+				outputPush( "\nSorry, I don't know what that means.\n" );
+			return "";
+		}
 		else
 		{
 			return executeCommand( text, world );
