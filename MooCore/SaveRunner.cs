@@ -66,6 +66,7 @@ public class SaveRunner : IDisposable
 		{
 			Interlocked.Decrement( ref _saveTimerRunning );
 			Log.Error( "Warning: stacked saveCallback() calls" );
+			Log.Debug( "Warning: stacked saveCallback() calls" );
 			return;
 		}
 
@@ -76,10 +77,13 @@ public class SaveRunner : IDisposable
 			}
 		) )
 		{
+			Log.Debug( "saverunner: waiting for merge..." );
+
 			// Get a merge slot. Wait for it if we have to. This will prevent world
 			// updates from happening until after we've saved it as it is.
 			using( var token = _canon.waitMergeToken() )
 			{
+				Log.Debug( "saverunner: doing save" );
 				try
 				{
 					// Delete old objects first.
@@ -94,6 +98,7 @@ public class SaveRunner : IDisposable
 				{
 					Log.Error( "Error during automatic save callbacks: {0}", ex );
 				}
+				Log.Debug( "saverunner: complete" );
 			}
 		}
 	}
