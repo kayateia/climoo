@@ -185,10 +185,6 @@
       <Project>{0AA2B12E-33C7-456C-B550-61C1AF11968B}</Project>
       <Name>MooCore</Name>
     </ProjectReference>
-    <ProjectReference Include="WebCore\WebCore.csproj">
-      <Project>{DD565C54-2CD9-4436-B41B-0AF7E3A8336D}</Project>
-      <Name>WebCore</Name>
-    </ProjectReference>
     <ProjectReference Include="DatabaseMySql\DatabaseMySql.csproj">
       <Project>{C5E1DBB2-320C-4F1D-ADD8-8A9EC3EEBE08}</Project>
       <Name>DatabaseMySql</Name>

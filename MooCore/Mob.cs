@@ -103,6 +103,8 @@ public class Mob
 		public const string Opaque = "opaque";		// Just needs to exist
 		public const string TeamMember = "teammember";		// Team member, aka admin
 		public const string Debug = "debug";		// Turns on debug messages if set
+		public const string Login = "login";		// For player objects
+		public const string Password = "password";	// For player objects -- SHA1 hash
 	}
 
 	/// <summary>

@@ -26,7 +26,6 @@ using System.Reflection;
 using System.Runtime.Serialization;
 
 using Kayateia.Climoo;
-using Kayateia.Climoo.Models;
 using Kayateia.Climoo.MooCore;
 using Kayateia.Climoo.Database;
 using Kayateia.Climoo.Database.Xml;
@@ -44,7 +43,6 @@ class Program
 		string binDir = Path.Combine( baseDir, "bin" );
 		string textDir = Path.Combine( baseDir, "text" );
 		string verbDir = Path.Combine( baseDir, "verb" );
-		string screenDir = Path.Combine( baseDir, "screen" );
 
 		XmlClimoo root = XmlPersistence.Load<XmlClimoo>( Path.Combine( baseDir, "mobs.xml" ) );
 
@@ -130,19 +128,9 @@ class Program
 			} 
 		}
 
-		Console.WriteLine( "Importing web database..." );
+		/*Console.WriteLine( "Importing web database..." );
 
 		XmlClimooWeb web = XmlPersistence.Load<XmlClimooWeb>( Path.Combine( baseDir, "web.xml" ) );
-
-		foreach (var s in web.screens) {
-			info.coredb.insert( token,
-				new DBScreen()
-				{
-					name = s.name,
-					text = File.ReadAllText( Path.Combine( screenDir, s.textName ) )
-				}
-			);
-		}
 
 		foreach (var u in web.users) {
 			info.coredb.insert( token,
@@ -155,7 +143,7 @@ class Program
 					name = u.name
 				}
 			);
-		}
+		} */
 	}
 
 	static void Export( Info info )
@@ -224,7 +212,7 @@ class Program
 			foreach( var name in m.verbList )
 			{
 				var item = m.verbGet( name );
-				string verbfn = "{0}-{1}.cs".FormatI( m.id, item.name );
+				string verbfn = "{0}-{1}.coral".FormatI( m.id, item.name );
 				File.WriteAllText( Path.Combine( verbDir, verbfn ), item.code );
 				XmlVerb verb = new XmlVerb()
 				{
@@ -236,38 +224,6 @@ class Program
 		}
 
 		XmlPersistence.Save<XmlClimoo>( Path.Combine( baseDir, "mobs.xml" ), root );
-
-		// This holds everything not in MooCore.
-		XmlClimooWeb web = new XmlClimooWeb();
-
-		Console.WriteLine("Exporting web core database...");
-		
-		string screenDir = Path.Combine( baseDir, "screen" );
-		Directory.CreateDirectory( screenDir );
-
-		var token = info.coredb.token();
-		foreach( var r in info.coredb.@select( token, new DBScreen(), new string[] { } ) )
-		{
-			var scrfn = String.Format( "{0}.html", r.name );
-			File.WriteAllText( Path.Combine( screenDir, scrfn ), r.text );
-
-			web.screens.Add( new XmlScreen()
-			{
-				name = r.name,
-				textName = scrfn
-			} );
-		}
-		web.users.AddRange(
-			from r in info.coredb.@select( token, new DBUser(), new string[] { } )
-			select new XmlUser() {
-				login = r.login,
-				name = r.name,
-				objectId = r.@object,
-				openId = r.openId,
-				password = r.password
-			});
-
-		XmlPersistence.Save<XmlClimooWeb>( Path.Combine( baseDir, "web.xml" ), web );
 	}
 
 	class Info : ImpExporterConfig

@@ -27,52 +27,39 @@ public class Login {
 	static public string LogUserIn(Session.UserContext cxt, string login, string password) {
 		int mobId;
 
-		using( var token = cxt.db.token() )
+		using( World w = Game.WorldData.GetShadow() )
 		{
-			// FIXME: Hash password.
-			var results = cxt.db.select(token, Models.User.Table, new Dictionary<string, object>() {
-				{ "login", login },
-				{ "password", password }
-			});
-			if (!results.Any())
+			string passwordHash = password.Sha1Hash();
+			Mob playerTemplate = w.findObject( World.WellKnownObjects.Player );
+			Mob mob = w.findObject( (m) => m.parentId == playerTemplate.id
+				&& m.attrHas( Mob.Attributes.Login ) && m.attrGet( Mob.Attributes.Login ).str == login
+				&& m.attrHas( Mob.Attributes.Password ) && m.attrGet( Mob.Attributes.Password ).str == passwordHash );
+			if( mob == null )
 				return "Invalid user name or password";
 
-			using( World w = Game.WorldData.GetShadow() )
-			{
-				Models.User u = Models.User.FromDatabase(results.First().Value);
+			mobId = mob.id;
 
-				// We found a matching user record. Does the user have a Mob?
-				if (u.objectid.HasValue) {
-					var mob = w.findObject( u.objectid.Value );
+			cxt.player = new Player( mobId );
+			mob.player = cxt.player;
+			/*} else {
+				// Make a new Mob for the user.
+				var mob = w.createObject(new {
+						name = u.name
+					},
+					location: w.findObject("/entry").id,
+					parent: w.findObject("/templates/player").id);
 
-					// If we fail here, there must be something funky. Fail out.
-					if (mob == null)
-						return "User has detached mob -- contact the admins, please.";
+				// Save out their new Mob id to their account.
+				u.objectid = mob.id;
+				cxt.db.update(token, Models.User.Table, u.id, new Dictionary<string, object>() {
+					{ "objectid", mob.id }
+				});
 
-					mobId = mob.id;
+				mobId = mob.id;
 
-					cxt.player = new Player( mobId );
-					mob.player = cxt.player;
-				} else {
-					// Make a new Mob for the user.
-					var mob = w.createObject(new {
-							name = u.name
-						},
-						location: w.findObject("/entry").id,
-						parent: w.findObject("/templates/player").id);
-
-					// Save out their new Mob id to their account.
-					u.objectid = mob.id;
-					cxt.db.update(token, Models.User.Table, u.id, new Dictionary<string, object>() {
-						{ "objectid", mob.id }
-					});
-
-					mobId = mob.id;
-
-					cxt.player = new Player( mobId );
-					mob.player = cxt.player;
-				}
-			}
+				cxt.player = new Player( mobId );
+				mob.player = cxt.player;
+			} */
 		}
 
 		return null;
