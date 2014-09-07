@@ -22,6 +22,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Coral = Kayateia.Climoo.Scripting.Coral;
 
 /// <summary>
 /// Shared utils for dealing with proxies. These are helpful independent
@@ -94,6 +95,22 @@ public class Proxy
 			return o;
 		else if( t.IsArray )
 			return ((Array)o).OfType<object>().Select( i => Proxy.Deproxify( i ) ).ToArray();
+		else if( t == typeof( List<object> ) )
+			return ((List<object>)o).Select( i => Proxy.Deproxify( i ) ).ToArray();
+		else if( t == typeof( Dictionary<object, object> ) )
+		{
+			var rv = new Dictionary<object, object>();
+			foreach ( var i in ((Dictionary<object,object>)o) )
+				rv.Add( Deproxify( i.Key ), Deproxify( i.Value ) );
+			return rv;
+		}
+		else if( o is Coral.Passthrough.PassthroughMetalObject )
+		{
+			// Rightfully speaking we shouldn't have to handle these here, but dealing with
+			// them in the scripting runtime means losing referential integrity of arrays and dictionaries.
+			// Here, we don't really care about that.
+			return Deproxify( ((Coral.Passthrough.PassthroughMetalObject)o).innerObject );
+		}
 		else if( o is IProxy )
 		{
 			return ((IProxy)o).deproxify();

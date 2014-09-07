@@ -126,7 +126,7 @@ class WorldProxy {
 	/// Returns a new PermProxy for use for setting permissions in-world.
 	/// </summary>
 	[CoralPassthrough]
-	public PermProxy newperm()
+	public PermProxy newblankperm()
 	{
 		return new PermProxy( _w, _p );
 	}
