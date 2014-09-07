@@ -30,7 +30,6 @@ using Kayateia.Climoo.Scripting.Coral;
 /// <summary>
 /// Tests for the Coral scripting language.
 /// </summary>
-[TestFixture]
 public partial class CoralTest
 {
 	// Needs "continue" once that's in. Otherwise works.
