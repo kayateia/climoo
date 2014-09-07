@@ -1,0 +1,2 @@
+a = 10
+b = {name:invop_exception,message:Can't set a Coral constant,trace:[ test:5,9 <[testconst] = 5>]}

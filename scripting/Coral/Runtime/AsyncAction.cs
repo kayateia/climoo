@@ -56,7 +56,19 @@ public class AsyncAction
 		/// <summary>
 		/// Execute a callback.
 		/// </summary>
-		Callback
+		Callback,
+
+		/// <summary>
+		/// Pushes a new variable scope onto the Coral stack. Note that this executes
+		/// immediately, unlike most of the others, so you'll want to actually put it last.
+		/// </summary>
+		PushScope,
+
+		/// <summary>
+		/// Pushes a new security context onto the Coral stack. Note that this executes
+		/// immediately, unlike most of the others, so you'll wnat to actually put it last.
+		/// </summary>
+		PushSecurityContext
 	}
 
 	/// <summary>
@@ -98,6 +110,16 @@ public class AsyncAction
 	/// Stack frame, for Call.
 	/// </summary>
 	public StackTrace.StackFrame frame { get; set; }
+
+	/// <summary>
+	/// Scope, for PushScope.
+	/// </summary>
+	public IScope scope { get; set; }
+
+	/// <summary>
+	/// Security context, for PushSecurityContext.
+	/// </summary>
+	public ISecurityContext securityContext { get; set; }
 }
 
 }

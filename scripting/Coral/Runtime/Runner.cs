@@ -80,7 +80,7 @@ public class Runner
 			catch( Exception ex )
 			{
 				// Wrap anything else (e.g. div by zero) as an invalid operation exception and do normal processing.
-				var cex = CoralException.GetInvOp( ex.Message );
+				var cex = CoralException.GetForAny( ex );
 				if( cex.trace == null )
 					cex.setStackTrace( _state );
 				AstTry.ThrowException( _state, cex );
@@ -108,10 +108,25 @@ public class Runner
 	/// <summary>
 	/// Sets a callback that will be called whenever a scope can't find an object.
 	/// </summary>
-	/// <param name="lookup"></param>
 	public void setScopeCallback( Func<string, object> lookup )
 	{
 		_state.setScopeCallback( s => lookup( s ) );
+	}
+
+	/// <summary>
+	/// Pushes a custom scope onto the stack.
+	/// </summary>
+	public void pushScope( IScope scope, string name = "custom scope" )
+	{
+		_state.pushActionAndScope( new Step( null, a => {}, name ), scope );
+	}
+
+	/// <summary>
+	/// Pushes a security context onto the stack.
+	/// </summary>
+	public void pushSecurityContext( ISecurityContext context, string name = null )
+	{
+		_state.pushActionAndSecurityContext( new Step( null, a => {}, "" ), context );
 	}
 
 	/// <summary>
@@ -177,6 +192,7 @@ public class Runner
 
 		// Built-in objects.
 		StringObject.RegisterObject( _state.constScope );
+		MathObject.RegisterObject( _state.constScope );
 	}
 
 	/// <summary>

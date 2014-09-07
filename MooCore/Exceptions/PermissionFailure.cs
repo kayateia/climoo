@@ -1,5 +1,4 @@
-﻿#region License
-/*
+﻿/*
 	CliMOO - Multi-User Dungeon, Object Oriented for the web
 	Copyright (C) 2010-2014 Kayateia
 
@@ -16,44 +15,25 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-#endregion
-namespace Kayateia.Climoo.Tests
+
+namespace Kayateia.Climoo.MooCore.Exceptions
 {
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using NUnit.Framework;
-using Kayateia.Climoo.Scripting.Coral;
 
 /// <summary>
-/// Tests for the Coral scripting language.
+/// Represents a failure to authenticate against the available permissions.
 /// </summary>
-[TestFixture]
-public partial class CoralTest
+public class PermissionFailure : ClimooException
 {
-	// Works
-	[Test]
-	public void Assignment()
+	public PermissionFailure( string msg ) : base( msg ) { }
+	public PermissionFailure( string msg, Perm p )
+		: base( msg )
 	{
-		string program = @"
-a = 5
-b = 10
-c = a
-d = a + c
-e = {}
-e.bar = ""baz""
-f = !e.bar
-g = e.foogle
-h = e[""boogle""]
-i = null
-j = !null
-k = b % 4
-l = !i || e.bar
-";
-		runAndDump( "Assignment", program );
+		_p = p;
 	}
+
+	public Perm perm { get { return _p; } }
+
+	Perm _p;
 }
 
 }

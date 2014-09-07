@@ -99,7 +99,10 @@ public class Mob
 		public const string Permissions = "perms";	// Int bitfield
 		public const string PulseVerb = "pulseverb";
 		public const string PulseFrequency = "pulsefreq";	// Should be an int
+		public const string PulseError = "pulseerror";		// Should be a string or nothing
 		public const string Opaque = "opaque";		// Just needs to exist
+		public const string TeamMember = "teammember";		// Team member, aka admin
+		public const string Debug = "debug";		// Turns on debug messages if set
 	}
 
 	/// <summary>
@@ -243,9 +246,14 @@ public class Mob
 		{
 			TypedAttribute ta = attrGet( Attributes.Permissions );
 			if( ta != null )
-				return (Perm[])ta.contents;
+			{
+				if( ta.contents is object[] )
+					return ((object[])ta.contents).Select( p => (Perm)p ).ToArray();
+				else
+					return (Perm[])ta.contents;
+			}
 			else
-				return null;
+				return new Perm[0];
 		}
 
 		set
@@ -352,20 +360,28 @@ public class Mob
 			return NullOrZero( findAttribute( Attributes.PulseFrequency, true ) );
 		}
 	}
+	public bool teamMember
+	{
+		get
+		{
+			var attr = attrGet( Attributes.TeamMember );
+			return attr != null && (bool)attr.contents == true;
+		}
+	}
 
-	static int NullOrZero( TypedAttribute attr )
+	static int NullOrZero( SourcedItem<TypedAttribute> attr )
 	{
 		if( attr == null )
 			return 0;
 		else
-			return attr.getContents<int>();
+			return attr.item.getContents<int>();
 	}
-	static string NullOrStr( TypedAttribute attr )
+	static string NullOrStr( SourcedItem<TypedAttribute> attr )
 	{
 		if( attr == null )
 			return null;
 		else
-			return attr.str;
+			return attr.item.str;
 	}
 
 	/// <summary>
@@ -462,9 +478,16 @@ public class Mob
 	/// <param name="verb">The verb name</param>
 	/// <param name="localOnly">False (default) if we're to search the inheritance hierarchy</param>
 	/// <returns>A Verb object for the verb, or null if not found.</returns>
-	public Verb findVerb( string verb, bool localOnly = false )
+	public SourcedItem<Verb> findVerb( string verb, bool localOnly = false )
 	{
-		return traverseInheritance( ( obj ) => obj.verbGet( verb ) );
+		return traverseInheritance( ( obj ) =>
+		{
+			Verb v = obj.verbGet( verb );
+			if( v == null )
+				return null;
+			else
+				return new SourcedItem<Verb>( obj, verb, v );
+		} );
 	}
 
 	/// <summary>
@@ -473,9 +496,16 @@ public class Mob
 	/// <param name="name">The attribute name</param>
 	/// <param name="localOnly">False (default) if we're to search the inheritance hierarchy</param>
 	/// <returns>A TypedAttribute with the attribute's contents, or null if not found.</returns>
-	public TypedAttribute findAttribute( string name, bool localOnly = false )
+	public SourcedItem<TypedAttribute> findAttribute( string name, bool localOnly = false )
 	{
-		return traverseInheritance( ( obj ) => obj.attrGet( name ) );
+		return traverseInheritance( ( obj ) =>
+		{
+			TypedAttribute a = obj.attrGet( name );
+			if( a == null )
+				return null;
+			else
+				return new SourcedItem<TypedAttribute>( obj, name, a );
+		} );
 	}
 
 	/// <summary>

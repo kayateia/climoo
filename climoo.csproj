@@ -70,10 +70,8 @@
     <Compile Include="Controllers\GameController.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Game\Login.cs" />
+    <Compile Include="Models\Permissions.cs" />
     <Compile Include="Models\SidebarInfo.cs" />
-    <Compile Include="Tasks\PublicSite.cs" />
-    <Compile Include="Tasks\Repeater.cs" />
-    <Compile Include="Tasks\UITask.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
@@ -187,10 +185,6 @@
       <Project>{0AA2B12E-33C7-456C-B550-61C1AF11968B}</Project>
       <Name>MooCore</Name>
     </ProjectReference>
-    <ProjectReference Include="scripting\s-sharp\SSharpScripting\SSharpScripting.csproj">
-      <Project>{0B54F58D-EB98-4B02-B007-6BD9AA2277FA}</Project>
-      <Name>SSharpScripting</Name>
-    </ProjectReference>
     <ProjectReference Include="WebCore\WebCore.csproj">
       <Project>{DD565C54-2CD9-4436-B41B-0AF7E3A8336D}</Project>
       <Name>WebCore</Name>
@@ -225,6 +219,7 @@
     <None Include="Content\bootstrap\fonts\glyphicons-halflings-regular.svg" />
     <None Include="Content\bootstrap\fonts\glyphicons-halflings-regular.ttf" />
     <None Include="Content\bootstrap\fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="Views\Game\PermEditor.cshtml" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />

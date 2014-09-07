@@ -54,14 +54,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Builtins\Strings.cs" />
+    <Compile Include="AnonMob.cs" />
+    <Compile Include="AnonWorld.cs" />
     <Compile Include="CanonMob.cs" />
     <Compile Include="CanonWorld.cs" />
+    <Compile Include="Exceptions\ClimooException.cs" />
+    <Compile Include="Exceptions\PermissionFailure.cs" />
     <Compile Include="JsonPersistence.cs" />
     <Compile Include="Mob.cs" />
     <Compile Include="Proxies\Proxy.cs" />
     <Compile Include="PulseRunner.cs" />
     <Compile Include="SaveRunner.cs" />
+    <Compile Include="SecurityContext.cs" />
     <Compile Include="ShadowMob.cs" />
     <Compile Include="ShadowWorld.cs" />
     <Compile Include="Timestamped.cs" />
@@ -102,10 +106,6 @@
     <ProjectReference Include="..\scripting\Coral\Coral.csproj">
       <Project>{1BB2C096-6CBA-48AC-BBD1-6E490235CEC5}</Project>
       <Name>Coral</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\scripting\s-sharp\SSharpScripting\SSharpScripting.csproj">
-      <Project>{0B54F58D-EB98-4B02-B007-6BD9AA2277FA}</Project>
-      <Name>SSharpScripting</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

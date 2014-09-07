@@ -6,5 +6,12 @@ e = added
 
 func = <def func(x): <([e] += [x])>>
 f = oh cool
-g = 6
+g = [6,bob]
+h = Current context: Context 1
+i = Current context: Base Context
+j = Current context: Base Context
+k = {name:test_exception,message:No idea what you're talking about!,trace:[ test:24,9 <call [[pt].complex](6)>, test:24,9 <call [[pt].complex](6)>]}
+l = {name:test_exception,message:Just try reading me bub,trace:[ test:30,9 <[l] = [[pt].throwme]>]}
+m = {name:test_exception,message:Just try writing me bub,trace:[ test:36,9 <[[pt].throwme] = "foo">]}
+n = {name:test_exception,message:New call'n'throw service in the tri-state area,trace:[ test:42,9 <call [[pt].callnthrow]()>, test:42,9 <call [[pt].callnthrow]()>]}
 object dump: 5 bob [1,2] True Kayateia.Climoo.Tests.CoralTest+PtTest new value

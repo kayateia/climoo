@@ -33,6 +33,19 @@ using Kayateia.Climoo.Scripting.Coral;
 [TestFixture]
 public partial class CoralTest
 {
+	class TestSC : ISecurityContext
+	{
+		public TestSC( string name )
+		{
+			this.name = name;
+		}
+
+		public string  name
+		{
+			get; private set;
+		}
+	}
+
 	class PtTest : IExtensible
 	{
 		[CoralPassthrough]
@@ -68,29 +81,57 @@ public partial class CoralTest
 		}
 		public string _prop;
 
+		[CoralPassthrough]
+		public string throwme
+		{
+			get
+			{
+				throw new ArgumentException( "Just try reading me bub" );
+			}
+			set
+			{
+				throw new ArgumentException( "Just try writing me bub" );
+			}
+		}
+
+		[CoralPassthrough]
+		public void callnthrow()
+		{
+			throw new ArgumentException( "New call'n'throw service in the tri-state area" );
+		}
+
 		public object getProperty( State state, string name )
 		{
 			if( name == "arbitrary" )
 				return "it's arbitrary, yo";
+			else if( name == "throws" )
+				throw new ArgumentException( "Can't read this" );
 			else
 				return "something else";
 		}
 
 		public bool hasProperty( State state, string name )
 		{
-			return name == "arbitrary" || name == "other";
+			return name == "arbitrary" || name == "other" || name == "throws";
 		}
 
 		public void setProperty( State state, string name, object value )
 		{
 			if( name == "arbitrary" )
 				_f = (string)value;
+			if( name == "throws" )
+				throw new ArgumentException( "Can't write this" );
 		}
 
 		public object callMethod( State state, string name, object[] args )
 		{
 			if( name == "test2" )
 				return "test worked " + String.Join( ",", args.Select( x => x.ToStringI() ).ToArray() );
+			else if( name == "dumpcontext" )
+			{
+				var cxt = state.securityContext;
+				return "Current context: " + ( cxt == null ? "none" : cxt.name );
+			}
 			else if( name == "complex" )
 			{
 				int which = (int)args[0];
@@ -131,8 +172,10 @@ public partial class CoralTest
 						}
 					};
 				}
-				else /*if( which == 3 )*/
+				else if( which == 3 )
 				{
+					var constscope = new ConstScope( state.scope );
+					constscope.setConstant( "testconst", "bob" );
 					return new AsyncAction[]
 					{
 						new AsyncAction()
@@ -140,7 +183,7 @@ public partial class CoralTest
 							action = AsyncAction.Action.Code,
 							code = Compiler.Compile( "test", @"
 def innerfunc(x):
-	return x + 1
+	return [x + 1, testconst]
 " )
 						},
 						new AsyncAction()
@@ -155,8 +198,64 @@ def innerfunc(x):
 								unitName = "test",
 								funcName = "PtTest.{0}".FormatI( name )
 							}
+						},
+						new AsyncAction()
+						{
+							action = AsyncAction.Action.PushScope,
+							scope = constscope
 						}
 					};
+				}
+				else if( which == 4 )
+				{
+					return new AsyncAction[]
+					{
+						new AsyncAction()
+						{
+							action = AsyncAction.Action.Code,
+							code = Compiler.Compile( "test", @"
+def innerfunc(pt):
+	return pt.dumpcontext()
+" )
+						},
+						new AsyncAction()
+						{
+							action = AsyncAction.Action.Call,
+							name = "innerfunc",
+							args = new object[] { this },
+							frame = new StackTrace.StackFrame()
+						},
+						new AsyncAction()
+						{
+							action = AsyncAction.Action.PushSecurityContext,
+							securityContext = new TestSC( "Context 1" )
+						}
+					};
+				}
+				else if( which == 5 )
+				{
+					return new AsyncAction[]
+					{
+						new AsyncAction()
+						{
+							action = AsyncAction.Action.Code,
+							code = Compiler.Compile( "test", @"
+def innerfunc(pt):
+	return pt.dumpcontext()
+" )
+						},
+						new AsyncAction()
+						{
+							action = AsyncAction.Action.Call,
+							name = "innerfunc",
+							args = new object[] { this },
+							frame = new StackTrace.StackFrame()
+						}
+					};
+				}
+				else /* if( which == 6 ) */
+				{
+					throw new ArgumentException( "No idea what you're talking about!" );
 				}
 			}
 			else
@@ -165,7 +264,15 @@ def innerfunc(x):
 
 		public bool hasMethod( State state, string name )
 		{
-			return name == "test2" || name == "complex";
+			return name == "test2" || name == "complex" || name == "dumpcontext";
+		}
+
+		public CoralException filterException( Exception ex )
+		{
+			if( ex is ArgumentException )
+				return CoralException.GetForName( "test_exception", ex.Message );
+			else
+				return CoralException.GetForAny( ex );
 		}
 	}
 
@@ -193,9 +300,37 @@ def func(x):
 pt.complex(1, func)
 f = pt.complex(2)
 g = pt.complex(3)
+h = pt.complex(4)
+i = pt.complex(5)
+j = pt.dumpcontext()
+
+k = 0
+try:
+	pt.complex(6)
+except e:
+	k = e
+
+l = 0
+try:
+	l = pt.throwme
+except e:
+	l = e
+
+m = 0
+try:
+	pt.throwme = ""foo""
+except e:
+	m = e
+
+n = 0
+try:
+	pt.callnthrow()
+except e:
+	n = e
 
 ";
 		Runner r = new Runner();
+		r.pushSecurityContext( new TestSC( "Base Context" ) );
 		pter.registerConst( r.state.constScope, "pt" );
 		runAndDump( "Passthrough", r, program,
 			() => "object dump: {0} {1} {2} {3} {4} {5}\r\n".FormatI(

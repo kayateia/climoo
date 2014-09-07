@@ -78,23 +78,28 @@ public class InputParser {
 		// besides false, we'll let it deal with everything else.
 		var root = player.world.findObject( 1 );
 		var playerMob = player.world.findObject( player.id );
-		Verb rootProcess = root.findVerb("_processInput");
+		Verb rootProcess = root.verbGet("_processInput");
 		if (rootProcess != null) {
 			param.self = root;
 			param.caller = playerMob;
-			try {
-				object results = rootProcess.invoke(param);
+			try
+			{
+				// This verb doesn't get any special permissions. It's just processing input from the user.
+				object results;
+				player.actorContextPush( "_processInput", player.id );
+				results = rootProcess.invoke( param );
 				if (results == null || (results is bool && (bool)results == false)) {
 					// Proceed jolly onwards...
 				} else {
 					// Our work here is finished.
 					return "";
 				}
-			} catch (Exception) {
+			}
+			catch( Exception ex )
+			{
 				// Just assume it didn't handle it. Sucks to get in a loop here if you
 				// mess up your global handler..!
-				//
-				// TODO: Log something out here or print to the player's console.
+				Log.Error( "Error while processing _processInput: {0}", ex );
 			}
 			param.self = null;
 			param.caller = null;
@@ -107,8 +112,11 @@ public class InputParser {
 			selectedVerb = SearchWildcardVerbsFrom(playerMob.location, verb, param);
 		if (selectedVerb.Any()) {
 			var v = selectedVerb.First();
-			param.self = v.Item1;
-			v.Item2.invoke(param);
+
+			param.self = v.foundOn;
+			player.actorContextPush( v.verb.name, v.definedOn.ownerId );
+			v.verb.invoke( param );
+
 			return "";
 		}
 
@@ -167,10 +175,11 @@ public class InputParser {
 		// Couldn't find one?
 		if (selectedVerb.Count() != 1) {
 			// Try for a "_huh" verb on the room the player is in.
-			Verb huh = playerMob.location.findVerb("_huh");
+			SourcedItem<Verb> huh = playerMob.location.findVerb("_huh");
 			if (huh != null) {
 				param.self = playerMob.location;
-				huh.invoke(param);
+				player.actorContextPush( "_huh", huh.source.id );
+				huh.item.invoke( param );
 				return "";
 			}
 
@@ -180,8 +189,9 @@ public class InputParser {
 
 		// Execute the verb.
 		var v2 = selectedVerb.First();
-		param.self = v2.Item1;
-		v2.Item2.invoke(param);
+		param.self = v2.foundOn;
+		player.actorContextPush( v2.verb.name, v2.definedOn.ownerId );
+		v2.verb.invoke( param );
 
 		// Any output will come from the script.
 		return "";
@@ -197,7 +207,7 @@ public class InputParser {
 		Verb v = new Verb() {
 			name = "inline",
 			help = "",
-			code = input.Substring(1) + ';'
+			code = "def verb():\n\t" + input.Substring(1)
 		};
 
 		var param = new Verb.VerbParameters() {
@@ -210,7 +220,9 @@ public class InputParser {
 			world = player.world
 		};
 
-		var rv = v.invoke(param);
+		object rv;
+		player.actorContextPush( "<immediate>", player.id );
+		rv = v.invoke( param );
 
 		// Try to do some reallly basic type massaging to make it viewable on the terminal.
 		string rvs;
@@ -266,25 +278,42 @@ public class InputParser {
 		return dobj;
 	}
 
-	static IEnumerable<Tuple<Mob,Verb>> SearchVerbsFrom(Mob m, string verbName,
+	class FoundVerb
+	{
+		public Mob foundOn;
+		public Mob definedOn;
+		public Verb verb;
+	}
+
+	static IEnumerable<FoundVerb> SearchVerbsFrom(Mob m, string verbName,
 		Verb.VerbParameters param)
 	{
 		param.self = m;
 		foreach (var v in m.allVerbs)
 			if (v.Value.item.name == verbName) {
 				if (v.Value.item.match(param).Count() > 0)
-					yield return Tuple.Create(m, v.Value.item);
+					yield return new FoundVerb()
+					{
+						foundOn = m,
+						definedOn = v.Value.source,
+						verb = v.Value.item
+					};
 			}
 	}
 
-	static IEnumerable<Tuple<Mob,Verb>> SearchWildcardVerbsFrom(Mob m, string verbName,
+	static IEnumerable<FoundVerb> SearchWildcardVerbsFrom(Mob m, string verbName,
 		Verb.VerbParameters param)
 	{
 		param.self = m;
 		foreach (var v in m.allVerbs)
 			if (v.Value.item.name == verbName) {
 				if (v.Value.item.matchWildcards(param).Count() > 0)
-					yield return Tuple.Create(m, v.Value.item);
+					yield return new FoundVerb()
+					{
+						foundOn = m,
+						definedOn = v.Value.source,
+						verb = v.Value.item
+					};
 			}
 	}
 }

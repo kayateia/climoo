@@ -95,6 +95,9 @@ public class GameController : Session.SessionFreeController {
 	[OutputCache(NoStore=true, Duration=0, VaryByParam="")]
 	public ActionResult Sidebar()
 	{
+		if( !_user.inGame )
+			return null;
+
 		SidebarInfo model = new SidebarInfo();
 
 		// This world is read-only, so it's okay to just let it go for the GC.
@@ -123,7 +126,7 @@ public class GameController : Session.SessionFreeController {
 				return null;
 
 			var attr = mob.findAttribute(attributeName);
-			return this.File(attr.getContents<byte[]>(), attr.mimetype);
+			return this.File(attr.item.getContents<byte[]>(), attr.item.mimetype);
 		}
 	}
 
@@ -170,7 +173,10 @@ public class GameController : Session.SessionFreeController {
 				// If it doesn't exist yet, make it. Otherwise we're setting on the existing one.
 				MooCore.Mob obj;
 				if (!id.HasValue)
+				{
 					obj = world.createObject( new {}, location: world.findObject( _user.player.id ).locationId );
+					obj.ownerId = _user.player.id;
+				}
 				else
 					obj = world.findObject( id.Value );
 				if (obj == null || obj == MooCore.Mob.None)
@@ -207,7 +213,6 @@ public class GameController : Session.SessionFreeController {
 
 		using( var world = Game.WorldData.GetShadow() )
 		{
-
 			MooCore.Mob obj = MooCore.InputParser.MatchName(objectId, world.findObject( _user.player.id ) );
 			if (obj == MooCore.Mob.None) {
 				result = new { valid = false, message = "Unknown object" };
@@ -258,6 +263,105 @@ public class GameController : Session.SessionFreeController {
 				result = new { valid = valid, message = message };
 			}
 		}
+
+		return Json(result, JsonRequestBehavior.DenyGet);
+	}
+
+	// Gets permissions from a MOO object for client-side scripting. This is used for editing.
+	public JsonResult GetPerms( string objectId )
+	{
+		if( !_user.inGame )
+			return null;
+
+		Permissions result;
+
+		using( var world = Game.WorldData.GetShadow() )
+		{
+			MooCore.Mob obj = MooCore.InputParser.MatchName(objectId, world.findObject( _user.player.id ) );
+			if (obj == MooCore.Mob.None) {
+				result = new Permissions()
+				{
+					success = false,
+					message = "Unknown object"
+				};
+			} else if (obj == MooCore.Mob.Ambiguous) {
+				result = new Permissions()
+				{
+					success = false,
+					message = "Ambiguous object"
+				};
+			} else {
+				MooCore.Perm[] perms = obj.permissions;
+				if (perms == null)
+					result = new Permissions()
+					{
+						success = true,
+						message = "No permissions",
+						objectId = obj.id,
+						perms = new Permission[0]
+					};
+				else {
+					result = new Permissions()
+					{
+						success = true,
+						message = "",
+						objectId = obj.id,
+						perms = perms
+							.Select( x => new Permission()
+							{
+								actorId = x.actorId,
+								permBits = x.permBits,
+								specificString = x.specificString,
+								type = x.typeString
+							} )
+							.ToArray()
+					};
+				}
+			}
+		}
+
+		return Json( result, JsonRequestBehavior.AllowGet );
+	}
+
+	// Sets permissions on a MOO object from client-side scripting. This is used for editing.
+	[HttpPost]
+	public JsonResult SetPerms( int objectId, Permissions perms )
+	{
+		if( !_user.inGame )
+			return null;
+
+		if( !ModelState.IsValid )
+		{
+			return Json( new Permissions()
+			{
+				success = false,
+				message = "Inputs were not valid"
+			} );
+		}
+
+		object result = new {};
+
+		/*using( var world = Game.WorldData.GetShadow() )
+		{
+			MooCore.Mob obj = world.findObject( objectId );
+			if (obj == null) {
+				result = new { valid = false, message = "Unknown object" };
+			} else {
+				string message = "";
+				bool valid = true;
+				try {
+					MooCore.Verb v = new MooCore.Verb() {
+						name = verb,
+						code = code
+					};
+					obj.verbSet(verb, v);
+				} catch (System.Exception ex) {
+					message = "<span class=\"error\">Exception: {0}</span>".FormatI(ex.Message);
+					valid = false;
+				}
+				result = new { valid = valid, message = message };
+			}
+		} */
 
 		return Json(result, JsonRequestBehavior.DenyGet);
 	}

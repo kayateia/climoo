@@ -21,6 +21,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Coral = Kayateia.Climoo.Scripting.Coral;
 
 /// <summary>
 /// Represents a user interacting with the world.
@@ -28,18 +29,48 @@ using System.Text;
 public class Player {
 	public delegate void OutputNotification(string text);
 	public OutputNotification NewOutput;
+	public OutputNotification NewErrorOutput;
 	public OutputNotification NewSound;
 
 	public Player( int id ) {
 		_id = id;
+
+		// Default to acting as the player.
+		_coralState = new Coral.State();
+		Coral.Runner r = new Coral.Runner( _coralState );
+		r.pushSecurityContext( new SecurityContext( "base", _id ) );
+
+		// If we're anon, make a mob for it.
+		if( id == Mob.Anon.id )
+		{
+			_anonWorld = new AnonWorld();
+			_anonMob = new AnonMob( _anonWorld, this );
+			_anonWorld.anonMob = _anonMob;
+		}
 	}
 
 	/// <summary>
 	/// This should be set whenever a context change happens (move to a new ShadowWorld).
 	/// </summary>
 	public World world {
-		get { return _world; }
-		set { _world = value; }
+		get
+		{
+			if( _anonWorld != null )
+				return World.Wrap( _anonWorld );
+			else
+				return _world;
+		}
+		set
+		{
+			_world = value;
+			if( _anonWorld != null )
+			{
+				if( _world == null )
+					_anonWorld.real = null;
+				else
+					_anonWorld.real = _world.get;
+			}
+		}
 	}
 
 	public int id
@@ -61,6 +92,14 @@ public class Player {
 		if (this.NewOutput != null) {
 			string moocoded = MooCode.PrepareForClient(text);
 			this.NewOutput(moocoded);
+		}
+	}
+
+	public void writeError(string text) {
+		if( this.NewErrorOutput != null )
+		{
+			string moocoded = MooCode.PrepareForClient(text);
+			this.NewErrorOutput(moocoded);
 		}
 	}
 
@@ -88,11 +127,79 @@ public class Player {
 	/// </summary>
 	public void detach() {
 		this.NewOutput = null;
+		this.NewErrorOutput = null;
 		this.NewSound = null;
 	}
 
+	/// <summary>
+	/// Pushes an actor context onto the Coral state. Do this before running code.
+	/// </summary>
+	public void actorContextPush( string name, int id )
+	{
+		Coral.Runner r = new Coral.Runner( _coralState );
+		r.pushSecurityContext( new SecurityContext( name, id ) );
+	}
+
+	/// <summary>
+	/// Returns the current actor context. This will be what code should be executing
+	/// under at any given moment.
+	/// </summary>
+	public int actorContext
+	{
+		get
+		{
+			SecurityContext cxt = (SecurityContext)_coralState.securityContext;
+			return cxt.actorId;
+		}
+	}
+
+	/// <summary>
+	/// Returns the current actor context stack. The entry nearest the top is the current one.
+	/// This is just a debug tool.
+	/// </summary>
+	public int[] actorContextStack
+	{
+		get
+		{
+			return _coralState.getSecurityContextStack()
+				.Select( cxt => ((SecurityContext)cxt).actorId )
+				.ToArray();
+		}
+	}
+
+	/// <summary>
+	/// The Coral state associated with the player.
+	/// </summary>
+	public Coral.State coralState
+	{
+		get
+		{
+			return _coralState;
+		}
+	}
+
+	/// <summary>
+	/// Our anonymous mob, if we have such a thing.
+	/// </summary>
+	public Mob anonMob
+	{
+		get
+		{
+			if( _anonMob == null )
+				return null;
+			else
+				return Mob.Wrap( _anonMob );
+		}
+	}
+
+
 	World _world;
 	int _id;
+	Coral.State _coralState;
+
+	// These are only used if this represents a player who isn't logged in yet.
+	AnonMob _anonMob;
+	AnonWorld _anonWorld;
 }
 
 }

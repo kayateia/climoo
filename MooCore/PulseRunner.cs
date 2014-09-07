@@ -141,17 +141,21 @@ public class PulseRunner : IDisposable
 					if( freq != 0 && (_ticks % freq) == 0 )
 					{
 						var verb = m.pulseVerb;
-						Verb v = m.findVerb( verb );
+						SourcedItem<Verb> v = m.findVerb( verb );
 						if( v == null )
 							continue;
+
+						// Make a temporary Player object just to pass down a context.
+						Player p = new Player( Perm.IsVerbAntistick( v.source, verb ) ? m.ownerId : v.source.ownerId );
 
 						var param = new Verb.VerbParameters()
 						{
 							args = new object[] { _ticks },
 							self = m,
-							world = _world
+							world = _world,
+							player = p
 						};
-						v.invoke( param );
+						v.item.invoke( param );
 
 						_world.waitForMerge();
 					}
@@ -159,6 +163,17 @@ public class PulseRunner : IDisposable
 				catch( Exception ex )
 				{
 					Log.Error( "Error executing pulse handler for {0}: {1}", id, ex );
+
+					// Try to leave a log on the object.
+					try
+					{
+						Mob m = _world.findObject( id );
+						if( m != null )
+							m.attrSet( Mob.Attributes.PulseError, ex.ToStringI() );
+					}
+					catch( Exception )
+					{
+					}
 				}
 			}
 		}

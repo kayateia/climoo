@@ -35,24 +35,21 @@ public partial class CoralTest
 {
 	// Works
 	[Test]
-	public void Assignment()
+	public void ConstScope()
 	{
 		string program = @"
-a = 5
-b = 10
-c = a
-d = a + c
-e = {}
-e.bar = ""baz""
-f = !e.bar
-g = e.foogle
-h = e[""boogle""]
-i = null
-j = !null
-k = b % 4
-l = !i || e.bar
+a = testconst
+b = """"
+try:
+	testconst = 5
+except exc:
+	b = exc
 ";
-		runAndDump( "Assignment", program );
+		Runner r = new Runner();
+		ConstScope scope = new ConstScope( r.state.scope );
+		scope.setConstant( "testconst", 10 );
+		r.pushScope( scope );
+		runAndDump( "ConstScope", r, program, null );
 	}
 }
 

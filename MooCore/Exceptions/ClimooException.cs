@@ -16,32 +16,19 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-namespace Kayateia.Climoo.Scripting.SSharp {
+namespace Kayateia.Climoo.MooCore.Exceptions
+{
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using ScriptNET.Runtime;
 
 /// <summary>
-/// Represents a binding of a method on an object in script code.
+/// Base class for all CliMOO-specific in-world exceptions. These will eventually
+/// be passed down to scripts to give them a chance to handle errors.
 /// </summary>
-internal class DynamicMethodBinding : IObjectBind {
-	public DynamicMethodBinding(IDynamicObject target, string name) {
-		_target = target;
-		_name = name;
-	}
-
-	public bool CanInvoke() {
-		return _target.hasMethod(_name);
-	}
-
-	public object Invoke(IScriptContext context, object[] args) {
-		return _target.callMethod(new Scope(context), _name, args);
-	}
-
-	IDynamicObject _target;
-	string _name;
+public class ClimooException : System.Exception
+{
+	public ClimooException() { }
+	public ClimooException( string msg ) : base( msg ) { }
+	public ClimooException( string msg, Exception inner ) : base( msg, inner ) { }
 }
 
 }

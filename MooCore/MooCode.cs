@@ -44,6 +44,7 @@ public class MooCode {
 		sb.Replace(">", "&gt;");
 
 		// Newlines become breaks.
+		sb.Replace( "\r", "" );
 		sb.Replace("\n", "<br/>");
 
 		// The rest we'll parse through a simple BBCode parser.

@@ -1,4 +1,5 @@
-﻿/*
+﻿#region License
+/*
 	CliMOO - Multi-User Dungeon, Object Oriented for the web
 	Copyright (C) 2010-2014 Kayateia
 
@@ -15,26 +16,24 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-namespace Kayateia.Climoo.Tasks {
+#endregion
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Web;
+using System.Text;
+
+namespace Kayateia.Climoo.Scripting.Coral
+{
 
 /// <summary>
-/// Really simple test UITask that just repeats what the user types.
+/// Interface for security context implementations.
 /// </summary>
-public class Repeater : UITask {
-	public Repeater(Session.UserContext context) : base(context) {
-	}
-
-	protected override IEnumerable<Result> runTask() {
-		for ( ; ; ) {
-			yield return Result.GetInput();
-			_context.outputPush(_input);
-		}
-	}
+public interface ISecurityContext
+{
+	/// <summary>
+	/// Returns a string describing the security context.
+	/// </summary>
+	string name { get; }
 }
 
 }

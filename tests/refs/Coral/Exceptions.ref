@@ -4,5 +4,5 @@ dd = yep
 deeper = <def deeper(): <<try: <<throw {"name":"bar"}>> except finally: <<[dd] = "yep">>>>>
 a = 10
 ee = {name:f,trace:[ test:29,17 <throw {"name":"f"}>]}
-ff = {name:invop_exception,message:Attempted to divide by zero.,trace:[ test:35,15 <[bob] = (10 / 0)>]}
+ff = {name:unknown_exception,message:Attempted to divide by zero.,trace:[ test:35,15 <[bob] = (10 / 0)>]}
 second test succeeded: escaped, Whee, I'm free!

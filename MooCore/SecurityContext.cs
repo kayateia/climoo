@@ -1,4 +1,5 @@
-﻿/*
+﻿#region License
+/*
 	CliMOO - Multi-User Dungeon, Object Oriented for the web
 	Copyright (C) 2010-2014 Kayateia
 
@@ -15,38 +16,24 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
-namespace Kayateia.Climoo.Scripting.SSharp {
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using ScriptNET;
+#endregion
+namespace Kayateia.Climoo.MooCore
+{
+using Coral = Kayateia.Climoo.Scripting.Coral;
 
 /// <summary>
-/// Represents a scripting fragment that runs within the MOO sandbox context.
+/// Coral security context implementation that stores an actor ID.
 /// </summary>
-public class ScriptFragment {
-	public ScriptFragment() { }
-	public ScriptFragment(string code) {
-		this.code = code;
+public class SecurityContext : Coral.ISecurityContext
+{
+	public SecurityContext( string name, int actorId )
+	{
+		this.name = name;
+		this.actorId = actorId;
 	}
 
-	public string code {
-		get { return _code; }
-		set {
-			_code = value;
-			_compiled = Script.Compile(_code);
-		}
-	}
-	string _code;
-
-	public object execute(Scope scope) {
-		Script recontexted =_compiled.DuplicateWithNewContext(scope.context);
-		return recontexted.Execute();
-	}
-
-	Script _compiled;
+	public int actorId { get; private set; }
+	public string name { get; private set; }
 }
 
 }

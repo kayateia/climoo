@@ -17,43 +17,34 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 #endregion
-namespace Kayateia.Climoo.Tests
+namespace Kayateia.Climoo.Scripting.Coral
 {
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text;
-using NUnit.Framework;
-using Kayateia.Climoo.Scripting.Coral;
 
 /// <summary>
-/// Tests for the Coral scripting language.
+/// Contains various math utilities.
 /// </summary>
-[TestFixture]
-public partial class CoralTest
+public class MathObject
 {
-	// Works
-	[Test]
-	public void Assignment()
+	static public void RegisterObject( ConstScope scope )
 	{
-		string program = @"
-a = 5
-b = 10
-c = a
-d = a + c
-e = {}
-e.bar = ""baz""
-f = !e.bar
-g = e.foogle
-h = e[""boogle""]
-i = null
-j = !null
-k = b % 4
-l = !i || e.bar
-";
-		runAndDump( "Assignment", program );
+		var pt = new Passthrough( new MathObject() );
+		pt.registerConst( scope, "math" );
 	}
+
+	[CoralPassthrough]
+	public int random( int max )
+	{
+		if( max == 0 )
+			throw CoralException.GetArg( "Can't random() with a max of zero" );
+		else
+			return m_rand.Next() % max;
+	}
+
+	Random m_rand = new Random();
 }
 
 }

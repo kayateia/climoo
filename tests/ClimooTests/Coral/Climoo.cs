@@ -77,6 +77,9 @@ public partial class CoralTest
 		}
 
 		public bool hasMethod( State state, string name ) { return true; }
+
+		// This is tested elsewhere.
+		public CoralException filterException( Exception ex ) { return CoralException.GetForAny( ex ); }
 	}
 
 	[Test]

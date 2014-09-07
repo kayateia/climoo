@@ -33,26 +33,19 @@ using Kayateia.Climoo.Scripting.Coral;
 [TestFixture]
 public partial class CoralTest
 {
-	// Works
 	[Test]
-	public void Assignment()
+	public void Math()
 	{
+		// Testing random() is sort of tricky.
 		string program = @"
-a = 5
-b = 10
-c = a
-d = a + c
-e = {}
-e.bar = ""baz""
-f = !e.bar
-g = e.foogle
-h = e[""boogle""]
-i = null
-j = !null
-k = b % 4
-l = !i || e.bar
+a = [math.random(50), math.random(50), math.random(50)]
+b = true
+for i in a:
+	if i < 0 || i >= 50:
+		b = false
+a = []
 ";
-		runAndDump( "Assignment", program );
+		runAndDump( "Math", program );
 	}
 }
 

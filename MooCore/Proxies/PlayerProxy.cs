@@ -21,7 +21,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Kayateia.Climoo.Scripting.SSharp;
 using Kayateia.Climoo.Scripting.Coral;
 
 /// <summary>
@@ -44,7 +43,6 @@ public class PlayerProxy : MobProxy {
 	/// <summary>
 	/// Write the specified text to the user's terminal.
 	/// </summary>
-	[Passthrough]
 	[CoralPassthrough]
 	public void write(string text) {
 		_player.write(text);
@@ -53,7 +51,6 @@ public class PlayerProxy : MobProxy {
 	/// <summary>
 	/// True if the player is actively logged in, or false if they are logged out.
 	/// </summary>
-	[Passthrough]
 	[CoralPassthrough]
 	public bool active {
 		get {

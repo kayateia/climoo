@@ -21,13 +21,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using Kayateia.Climoo.Scripting.SSharp;
 using Kayateia.Climoo.Scripting.Coral;
 
 /// <summary>
 /// MOO Proxy object for the World object. This is available to MOO scripts.
 /// </summary>
-class WorldProxy : DynamicObjectBase {
+class WorldProxy {
 	public WorldProxy( World w, Player p )
 	{
 		_w = w;
@@ -41,7 +40,6 @@ class WorldProxy : DynamicObjectBase {
 	/// Finds an object in the world by ID and returns a proxy for it.
 	/// </summary>
 	/// <param name='id'>The object's ID.</param>
-	[Passthrough]
 	[CoralPassthrough]
 	public MobProxy obj(int id) {
 		Mob m = _w.findObject(id);
@@ -53,7 +51,6 @@ class WorldProxy : DynamicObjectBase {
 	/// Finds an object in the world by textual path and returns a proxy for it.
 	/// </summary>
 	/// <param name='path'>The object's path.</param>
-	[Passthrough]
 	[CoralPassthrough]
 	public MobProxy obj(string path) {
 		Mob m = _w.findObject(path);
@@ -66,7 +63,6 @@ class WorldProxy : DynamicObjectBase {
 	/// </summary>
 	/// <param name="name">Object's name; can be an object in the room, or a path, or a #x name.</param>
 	/// <param name="refObj">The first parameter is the reference object to use, or where we start looking.</param>
-	[Passthrough]
 	[CoralPassthrough]
 	public MobProxy obj( string name, MobProxy refObj )
 	{
@@ -79,11 +75,11 @@ class WorldProxy : DynamicObjectBase {
 	/// <summary>
 	/// Creates a new object in the world and returns a proxy for it.
 	/// </summary>
-	[Passthrough]
 	[CoralPassthrough]
 	public MobProxy create() {
 		Mob m = _w.createObject();
 		m.parentId = 1;
+		m.ownerId = _p.id;
 		return new MobProxy(m, _p);
 	}
 
@@ -91,7 +87,6 @@ class WorldProxy : DynamicObjectBase {
 	/// Deletes an object from the world by ID.
 	/// </summary>
 	/// <param name='id'>The ID to be deleted.</param>
-	[Passthrough]
 	[CoralPassthrough]
 	public void del(int id) {
 		_w.destroyObject(id);
@@ -100,7 +95,6 @@ class WorldProxy : DynamicObjectBase {
 	/// <summary>
 	/// Checkpoint the world database.
 	/// </summary>
-	[Passthrough]
 	[CoralPassthrough]
 	public void checkpoint( string name ) {
 		_p.write("Checkpointing database...");
@@ -111,7 +105,6 @@ class WorldProxy : DynamicObjectBase {
 	/// <summary>
 	/// Returns a list of checkpoints in the world database.
 	/// </summary>
-	[Passthrough]
 	[CoralPassthrough]
 	public WorldCheckpoint[] checkpoints {
 		get { return _w.checkpoints; }
@@ -121,7 +114,6 @@ class WorldProxy : DynamicObjectBase {
 	/// Removes a world database checkpoint by ID.
 	/// </summary>
 	/// <param name='id'>The checkpoint ID</param>
-	[Passthrough]
 	[CoralPassthrough]
 	public void checkpointRemove( ulong id )
 	{
@@ -133,11 +125,28 @@ class WorldProxy : DynamicObjectBase {
 	/// <summary>
 	/// Returns a new PermProxy for use for setting permissions in-world.
 	/// </summary>
-	[Passthrough]
 	[CoralPassthrough]
 	public PermProxy newperm()
 	{
 		return new PermProxy( _w, _p );
+	}
+
+	/// <summary>
+	/// Returns a new PermProxy, pre-populated.
+	/// </summary>
+	[CoralPassthrough]
+	public PermProxy newperm( int actorId, string type, int bits, string specific )
+	{
+		PermProxy pp = new PermProxy( _w, _p, new Perm()
+			{
+				actorId = actorId,
+				specific = specific
+			}
+		);
+		pp.permbits = bits;
+		pp.type = type;
+
+		return pp;
 	}
 }
 

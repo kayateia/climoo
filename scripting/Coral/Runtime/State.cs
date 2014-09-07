@@ -35,7 +35,7 @@ public class State
 
 		_resultStack = new Stack<object>();
 
-		_constScope = new ConstScope();
+		_constScope = new ConstScope( null );
 		_lookupScope = new LookupScope( _constScope );
 		_rootScope = new StandardScope( _lookupScope );
 
@@ -71,6 +71,18 @@ public class State
 	}
 
 	/// <summary>
+	/// The base scope, below any other standard scopes. This is useful if you
+	/// want to make a scope that includes nothing previously on the stack.
+	/// </summary>
+	public IScope baseScope
+	{
+		get
+		{
+			return _lookupScope;
+		}
+	}
+
+	/// <summary>
 	/// A miscellaneous scope that you can set arbitrary values into, to keep
 	/// client app metadata along with the state.
 	/// </summary>
@@ -80,6 +92,33 @@ public class State
 		{
 			return _baggage;
 		}
+	}
+
+	/// <summary>
+	/// Returns the current security context, if any.
+	/// </summary>
+	public ISecurityContext securityContext
+	{
+		get
+		{
+			Step s = findAction( step => step.securityContext != null );
+			if( s != null )
+				return s.securityContext;
+			else
+				return null;
+		}
+	}
+
+	/// <summary>
+	/// Returns the full list of security contexts, from most recent to earliest.
+	/// </summary>
+	public ISecurityContext[] getSecurityContextStack()
+	{
+		var cxts = new List<ISecurityContext>();
+		foreach( Step s in _stack )
+			if( s.securityContext != null )
+				cxts.Add( s.securityContext );
+		return cxts.ToArray();
 	}
 
 	/// <summary>
@@ -114,6 +153,16 @@ public class State
 	public void pushActionAndScope( Step action, IScope scope )
 	{
 		action.scope = scope;
+		_stack.Push( action );
+	}
+
+	/// <summary>
+	/// Push a single action onto the step stack, creating a new security context.
+	/// </summary>
+	public void pushActionAndSecurityContext( Step action, ISecurityContext context )
+	{
+		action.securityContext = context;
+		action.description = "security context: {0}".FormatI( context.name );
 		_stack.Push( action );
 	}
 
